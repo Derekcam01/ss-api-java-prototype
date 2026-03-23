@@ -13,12 +13,43 @@
         .logo-font { font-family: 'Space Grotesk', sans-serif; }
         table { border-collapse: collapse; }
         th { background-color: rgb(var(--elcom-blue)); color: white; }
-        tr:hover { background-color: #0a2a2c; }
     </style>
 </head>
-<body class="tail-container bg-zinc-950 text-zinc-200 h-full">
+<body class="tail-container bg-zinc-950 text-zinc-200 h-full relative">
+    
+    <div id="details-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl w-[800px] max-h-[80vh] flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/50 rounded-t-2xl">
+                <h2 id="modal-title" class="text-xl font-semibold text-[#0CBFCA] pr-4">Contract Title</h2>
+                <button onclick="closeModal()" class="text-zinc-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 flex-1 text-sm text-zinc-300">
+                <div>
+                    <h3 class="text-white font-medium mb-2 border-b border-zinc-800 pb-1">Contract Description</h3>
+                    <p id="modal-desc" class="leading-relaxed whitespace-pre-wrap">...</p>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-white font-medium mb-2 border-b border-zinc-800 pb-1">Buyer Details</h3>
+                        <p id="modal-buyer" class="text-zinc-400">...</p>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-medium mb-2 border-b border-zinc-800 pb-1">Primary Category (CPV)</h3>
+                        <p id="modal-cpv" class="font-mono text-zinc-400 bg-zinc-950 p-2 rounded border border-zinc-800 mt-1">...</p>
+                    </div>
+                </div>
+                <div>
+                     <h3 class="text-white font-medium mb-2 border-b border-zinc-800 pb-1">Official FTS Link</h3>
+                     <a id="modal-link" href="#" target="_blank" class="text-[#0CBFCA] hover:underline break-all">...</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="flex h-screen overflow-hidden">
-        <div class="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col">
+        <div class="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col z-10">
             <div class="p-6 border-b border-zinc-800">
                 <div class="flex items-center gap-x-3">
                     <div class="w-9 h-9 bg-[#0CBFCA] rounded-2xl flex items-center justify-center text-zinc-950 font-bold text-2xl logo-font">MQ</div>
@@ -29,50 +60,35 @@
             <div class="flex-1 overflow-y-auto py-6 px-3">
                 <nav class="space-y-1">
                     <a href="#" class="flex items-center gap-x-3 px-4 py-3 rounded-2xl bg-zinc-800 text-white font-medium">
-                        <i class="fa-solid fa-magnifying-glass w-5"></i>
-                        <span>Discover Tenders</span>
+                        <i class="fa-solid fa-magnifying-glass w-5"></i><span>Discover Tenders</span>
                     </a>
                     <a href="#" class="flex items-center gap-x-3 px-4 py-3 rounded-2xl hover:bg-zinc-800 text-zinc-400">
-                        <i class="fa-solid fa-bookmark w-5"></i>
-                        <span>My Search Profiles</span>
-                    </a>
-                    <a href="#" class="flex items-center gap-x-3 px-4 py-3 rounded-2xl hover:bg-zinc-800 text-zinc-400">
-                        <i class="fa-solid fa-bell w-5"></i>
-                        <span>My Alerts</span>
+                        <i class="fa-solid fa-bookmark w-5"></i><span>My Search Profiles</span>
                     </a>
                 </nav>
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 flex flex-col relative z-0">
             <header class="h-16 bg-zinc-900 border-b border-zinc-800 px-8 flex items-center justify-between">
                 <div class="flex items-center gap-x-6">
                     <div class="flex items-center gap-x-2 text-[#0CBFCA]">
-                        <i class="fa-solid fa-search"></i>
-                        <span class="font-semibold">Discover</span>
+                        <i class="fa-solid fa-search"></i><span class="font-semibold">Discover</span>
                     </div>
-                    <input id="global-search" placeholder="Quick keyword search..." class="bg-zinc-800 border border-zinc-700 focus:border-[#0CBFCA] rounded-3xl px-6 py-2 w-96 text-sm outline-none">
-                </div>
-                <div class="flex items-center gap-x-6">
-                    <button onclick="saveCurrentSearch()" class="flex items-center gap-x-2 px-5 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-3xl">
-                        <i class="fa-solid fa-bookmark"></i>
-                        <span>Save Profile</span>
-                    </button>
-                    <button onclick="openAlertModal()" class="flex items-center gap-x-2 px-5 py-2 bg-[#0CBFCA] text-zinc-950 font-medium rounded-3xl">
-                        <i class="fa-solid fa-bell"></i>
-                        <span>Create Alert</span>
-                    </button>
+                    <input id="global-search" placeholder="Quick keyword search..." class="bg-zinc-800 border border-zinc-700 focus:border-[#0CBFCA] rounded-3xl px-6 py-2 w-96 text-sm outline-none transition-colors">
                 </div>
             </header>
 
             <div class="flex-1 p-8 overflow-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="text-left border-b border-zinc-700">
+                        <tr class="text-left border-b border-zinc-700 select-none">
                             <th class="py-4 px-4">Title</th>
                             <th class="py-4 px-4">Published</th>
                             <th class="py-4 px-4">Closing Date</th>
-                            <th class="py-4 px-4">Value</th>
+                            <th class="py-4 px-4 cursor-pointer hover:bg-zinc-800/50 transition-colors" onclick="sortByValue()">
+                                Value <i class="fa-solid fa-sort ml-1 text-zinc-300"></i>
+                            </th>
                             <th class="py-4 px-4">Buyer</th>
                             <th class="py-4 px-4">Action</th>
                             <th class="py-4 px-4">Type</th>
@@ -85,7 +101,8 @@
     </div>
 
     <script>
-        let allReleases = []; // Global memory for the search bar
+        let allReleases = [];
+        let sortDescending = true;
 
         async function fetchAndRenderLiveData() {
             const tbody = document.getElementById('table-body');
@@ -102,7 +119,6 @@
                     tbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-zinc-400">No contracts found.</td></tr>';
                     return;
                 }
-
                 renderTable(allReleases.slice(0, 20));
             } catch (error) {
                 console.error("Connection failed:", error);
@@ -110,12 +126,32 @@
             }
         }
 
+        // --- SORTING LOGIC ---
+        function sortByValue() {
+            allReleases.sort((a, b) => {
+                const valA = a.tender?.value?.amount || 0;
+                const valB = b.tender?.value?.amount || 0;
+                return sortDescending ? valB - valA : valA - valB;
+            });
+            
+            sortDescending = !sortDescending;
+            
+            const searchInput = document.getElementById('global-search').value.toLowerCase();
+            const filteredData = allReleases.filter(release => {
+                const title = (release.tender?.title || "").toLowerCase();
+                const buyerName = (release.parties?.find(p => p.roles?.includes('buyer'))?.name || "").toLowerCase();
+                return title.includes(searchInput) || buyerName.includes(searchInput);
+            });
+            
+            renderTable(filteredData.slice(0, 20));
+        }
+
         function renderTable(releasesToRender) {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = ''; 
 
             if (releasesToRender.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-zinc-500">No matches found for your search keyword.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-zinc-500">No matches found.</td></tr>';
                 return;
             }
 
@@ -125,45 +161,73 @@
                 const closing = release.tender?.tenderPeriod?.endDate ? release.tender.tenderPeriod.endDate.split('T')[0] : "Open";
                 const rawValue = release.tender?.value?.amount;
                 const value = rawValue ? '£' + rawValue.toLocaleString() : "TBA";
-                
                 const buyer = release.parties?.find(p => p.roles?.includes('buyer'));
                 const location = buyer ? buyer.name : "UK Gov";
-                
                 const type = release.tender?.mainProcurementCategory || "service";
 
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-zinc-800 cursor-pointer border-b border-zinc-800/50 transition-colors';
+                row.className = 'hover:bg-zinc-800/80 border-b border-zinc-800/50 transition-colors group';
                 row.innerHTML = `
                     <td class="py-4 px-4 font-medium text-[#0CBFCA]" title="${title}">${title.substring(0, 50)}...</td>
                     <td class="py-4 px-4 text-zinc-400">${published}</td>
                     <td class="py-4 px-4 text-zinc-400">${closing}</td>
                     <td class="py-4 px-4 font-mono">${value}</td>
                     <td class="py-4 px-4" title="${location}">${location.substring(0, 30)}</td>
-                    <td class="py-4 px-4 font-mono text-zinc-500 hover:text-white">View Details</td>
+                    <td class="py-4 px-4 font-mono text-zinc-500">
+                        <button class="view-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 hover:text-white rounded-md transition-colors border border-zinc-700">View Details</button>
+                    </td>
                     <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs bg-zinc-800 text-zinc-300 capitalize border border-zinc-700">${type}</span></td>
                 `;
+                row.querySelector('.view-btn').addEventListener('click', () => openModal(release));
                 tbody.appendChild(row);
             });
         }
 
-        // Search Bar Listener
+        // --- MODAL LOGIC ---
+        function openModal(release) {
+            const title = release.tender?.title || "Title Not Disclosed";
+            const desc = release.tender?.description || "No specific description provided by the buyer.";
+            const buyer = release.parties?.find(p => p.roles?.includes('buyer'));
+            const buyerName = buyer ? buyer.name : "Unknown Buyer";
+            const cpvId = release.tender?.items?.[0]?.classification?.id || release.tender?.mainProcurementCategory || "N/A";
+            const cpvDesc = release.tender?.items?.[0]?.classification?.description || "No specific classification";
+            
+            const ftsLink = "https://www.find-tender.service.gov.uk/Notice/" + (release.tender?.id || "");
+
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-buyer').innerText = buyerName;
+            document.getElementById('modal-cpv').innerText = cpvId + " - " + cpvDesc;
+            
+            const linkElement = document.getElementById('modal-link');
+            linkElement.href = ftsLink;
+            linkElement.innerText = ftsLink;
+
+            const modal = document.getElementById('details-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('details-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // --- SEARCH LOGIC ---
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('global-search');
             searchInput.addEventListener('input', (event) => {
                 const keyword = event.target.value.toLowerCase();
                 const filteredData = allReleases.filter(release => {
                     const title = (release.tender?.title || "").toLowerCase();
-                    const buyer = release.parties?.find(p => p.roles?.includes('buyer'));
-                    const buyerName = (buyer ? buyer.name : "").toLowerCase();
+                    const buyerName = (release.parties?.find(p => p.roles?.includes('buyer'))?.name || "").toLowerCase();
                     return title.includes(keyword) || buyerName.includes(keyword);
                 });
                 renderTable(filteredData.slice(0, 20));
             });
         });
 
-        function saveCurrentSearch() { alert('Feature coming soon: Save Search to MySQL Database'); }
-        function openAlertModal() { alert('Feature coming soon: Schedule Daily Email Alerts'); }
-        
         window.onload = fetchAndRenderLiveData;
     </script>
 </body>
