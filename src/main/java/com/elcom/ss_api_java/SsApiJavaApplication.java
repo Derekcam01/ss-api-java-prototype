@@ -14,33 +14,25 @@ public class SsApiJavaApplication {
         SpringApplication.run(SsApiJavaApplication.class, args);
     }
 
-    @GetMapping("/")
-    public String home() {
+    // We moved our raw FTS data to a dedicated background API channel!
+    // The frontend UI will eventually "call" this channel to get its data.
+    @GetMapping("/api/live-data")
+    public String getFtsData() {
         String apiUrl = "https://www.find-tender.service.gov.uk/api/1.0/ocdsReleasePackages";
 
         try {
-            // FIX: We build our 16MB web client directly inside the page loader!
             WebClient webClient = WebClient.builder()
                     .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
                     .build();
 
-            // Grab the data from the UK Gov
-            String response = webClient.get()
+            return webClient.get()
                     .uri(apiUrl)
                     .retrieve()
                     .bodyToMono(String.class)
                     .block(); 
-
-            // Build a simple HTML webpage to display it
-            String htmlPage = "<h1>Elcom FTS Data Portal</h1>";
-            htmlPage += "<p><b>STATUS:</b> Connection Successful! Live data retrieved.</p><hr>";
-            htmlPage += "<h3>Raw OCDS JSON Data (First 1500 characters):</h3>";
-            htmlPage += "<pre style='background-color: #f4f4f4; padding: 15px; border-radius: 5px;'>" + response.substring(0, Math.min(response.length(), 1500)) + "...</pre>";
-
-            return htmlPage;
             
         } catch (Exception e) {
-            return "<h1>Error</h1><p>Connection failed: " + e.getMessage() + "</p>";
+            return "{\"error\": \"Connection failed: " + e.getMessage() + "\"}";
         }
     }
 }
