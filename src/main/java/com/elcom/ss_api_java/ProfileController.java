@@ -22,6 +22,12 @@ public class ProfileController {
 
     @GetMapping("/list")
     public List<Map<String, Object>> listProfiles() {
-        return jdbcTemplate.queryForList("SELECT * FROM search_profiles ORDER BY created_at DESC");
+        return jdbcTemplate.queryForList("SELECT * FROM search_profiles ORDER BY id DESC");
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public Map<String, String> deleteProfile(@PathVariable Long id) {
+        jdbcTemplate.update("DELETE FROM search_profiles WHERE id = ?", id);
+        return Map.of("status", "deleted");
     }
 }
