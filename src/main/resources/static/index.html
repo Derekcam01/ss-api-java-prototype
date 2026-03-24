@@ -3,27 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MultiQuote Opportunity Alerts • Modern Table View</title>
+    <title>MultiQuote Opportunity Alerts</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
         :root { --elcom-blue: 12 191 202; }
-        .tail-container { font-family: 'Inter', system_ui, sans-serif; }
+        .tail-container { font-family: 'Inter', sans-serif; }
         .logo-font { font-family: 'Space Grotesk', sans-serif; }
         table { border-collapse: collapse; }
         th { background-color: rgb(var(--elcom-blue)); color: white; }
     </style>
 </head>
-<body class="tail-container bg-zinc-950 text-zinc-200 h-full relative">
+<body class="tail-container bg-zinc-950 text-zinc-200 h-full relative text-left">
     
     <div id="details-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
         <div class="bg-zinc-900 border border-zinc-700 rounded-2xl w-[800px] max-h-[80vh] flex flex-col shadow-2xl">
             <div class="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/50 rounded-t-2xl">
                 <h2 id="modal-title" class="text-xl font-semibold text-[#0CBFCA] pr-4">Contract Title</h2>
-                <button onclick="closeModal()" class="text-zinc-400 hover:text-white transition-colors">
-                    <i class="fa-solid fa-xmark text-2xl"></i>
-                </button>
+                <button onclick="closeModal()" class="text-zinc-400 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-2xl"></i></button>
             </div>
             <div class="p-6 overflow-y-auto space-y-6 flex-1 text-sm text-zinc-300">
                 <div>
@@ -32,12 +30,13 @@
                 </div>
                 <div class="grid grid-cols-2 gap-6">
                     <div>
-                        <h3 class="text-white font-medium mb-2 border-b border-zinc-800 pb-1">Buyer Details</h3>
+                        <h3 class="text-white font-medium mb-2 border-b border-zinc-800 pb-1">Buyer</h3>
                         <p id="modal-buyer" class="text-zinc-400">...</p>
                     </div>
                     <div>
-                        <h3 class="text-white font-medium mb-2 border-b border-zinc-800 pb-1">Primary Category (CPV)</h3>
-                        <p id="modal-cpv" class="font-mono text-zinc-400 bg-zinc-950 p-2 rounded border border-zinc-800 mt-1">...</p>
+                        <h3 class="text-white font-medium mb-2 border-b border-zinc-800 pb-1">Dates</h3>
+                        <p class="text-zinc-400 text-xs uppercase">Starts: <span id="modal-start" class="text-white font-mono ml-2">...</span></p>
+                        <p class="text-zinc-400 text-xs uppercase mt-1">Ends: <span id="modal-end" class="text-white font-mono ml-4">...</span></p>
                     </div>
                 </div>
                 <div>
@@ -49,49 +48,41 @@
     </div>
 
     <div class="flex h-screen overflow-hidden">
-        <div class="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col z-10">
-            <div class="p-6 border-b border-zinc-800">
-                <div class="flex items-center gap-x-3">
-                    <div class="w-9 h-9 bg-[#0CBFCA] rounded-2xl flex items-center justify-center text-zinc-950 font-bold text-2xl logo-font">MQ</div>
-                    <div class="logo-font text-3xl font-semibold tracking-tighter text-white">MultiQuote</div>
-                </div>
-                <p class="text-xs text-zinc-400 mt-1">Opportunity Alerts</p>
+        <div class="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col z-10 p-6">
+            <div class="flex items-center gap-x-3 mb-8">
+                <div class="w-9 h-9 bg-[#0CBFCA] rounded-2xl flex items-center justify-center text-zinc-950 font-bold text-2xl logo-font">MQ</div>
+                <div class="logo-font text-3xl font-semibold tracking-tighter text-white">MultiQuote</div>
             </div>
-            <div class="flex-1 overflow-y-auto py-6 px-3">
-                <nav class="space-y-1">
-                    <a href="#" class="flex items-center gap-x-3 px-4 py-3 rounded-2xl bg-zinc-800 text-white font-medium">
-                        <i class="fa-solid fa-magnifying-glass w-5"></i><span>Discover Tenders</span>
-                    </a>
-                    <a href="#" class="flex items-center gap-x-3 px-4 py-3 rounded-2xl hover:bg-zinc-800 text-zinc-400">
-                        <i class="fa-solid fa-bookmark w-5"></i><span>My Search Profiles</span>
-                    </a>
-                </nav>
-            </div>
+            <nav class="space-y-2">
+                <a href="#" class="flex items-center gap-x-3 px-4 py-3 rounded-2xl bg-zinc-800 text-white font-medium">
+                    <i class="fa-solid fa-magnifying-glass w-5"></i><span>Discover</span>
+                </a>
+                <a href="#" class="flex items-center gap-x-3 px-4 py-3 rounded-2xl hover:bg-zinc-800 text-zinc-400">
+                    <i class="fa-solid fa-bookmark w-5"></i><span>My Profiles</span>
+                </a>
+            </nav>
         </div>
 
         <div class="flex-1 flex flex-col relative z-0">
             <header class="h-16 bg-zinc-900 border-b border-zinc-800 px-8 flex items-center justify-between">
-                <div class="flex items-center gap-x-6">
-                    <div class="flex items-center gap-x-2 text-[#0CBFCA]">
-                        <i class="fa-solid fa-search"></i><span class="font-semibold">Discover</span>
-                    </div>
-                    <input id="global-search" placeholder="Quick keyword search..." class="bg-zinc-800 border border-zinc-700 focus:border-[#0CBFCA] rounded-3xl px-6 py-2 w-96 text-sm outline-none transition-colors">
+                <div class="flex items-center gap-x-4">
+                    <input id="global-search" placeholder="Search keywords..." class="bg-zinc-800 border border-zinc-700 focus:border-[#0CBFCA] rounded-3xl px-6 py-2 w-80 text-sm outline-none">
+                    <span id="results-count" class="text-xs text-zinc-500 font-mono">Found: 0</span>
+                    <button onclick="saveProfile()" class="px-4 py-2 bg-[#0CBFCA] text-zinc-950 font-semibold rounded-3xl hover:bg-[#0aa6b0] text-xs uppercase tracking-wider transition-all">Save Profile</button>
                 </div>
             </header>
 
             <div class="flex-1 p-8 overflow-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="text-left border-b border-zinc-700 select-none">
-                            <th class="py-4 px-4">Title</th>
-                            <th class="py-4 px-4">Published</th>
-                            <th class="py-4 px-4">Closing Date</th>
-                            <th class="py-4 px-4 cursor-pointer hover:bg-zinc-800/50 transition-colors" onclick="sortByValue()">
-                                Value <i class="fa-solid fa-sort ml-1 text-zinc-300"></i>
-                            </th>
+                        <tr class="text-left border-b border-zinc-700">
+                            <th class="py-4 px-4 rounded-tl-xl">Opportunity</th>
+                            <th class="py-4 px-4">Status</th>
+                            <th class="py-4 px-4">Closing</th>
+                            <th class="py-4 px-4">Duration</th>
+                            <th class="py-4 px-4 cursor-pointer hover:opacity-80" onclick="sortByValue()">Value <i class="fa-solid fa-sort ml-1"></i></th>
                             <th class="py-4 px-4">Buyer</th>
-                            <th class="py-4 px-4">Action</th>
-                            <th class="py-4 px-4">Type</th>
+                            <th class="py-4 px-4 rounded-tr-xl">Action</th>
                         </tr>
                     </thead>
                     <tbody id="table-body" class="divide-y divide-zinc-800"></tbody>
@@ -106,126 +97,98 @@
 
         async function fetchAndRenderLiveData() {
             const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-[#0CBFCA] animate-pulse">Fetching live data from UK Government FTS...</td></tr>';
-
+            tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-[#0CBFCA] animate-pulse">Fetching UK Gov Data...</td></tr>';
             try {
                 const response = await fetch('/api/live-data');
-                if (!response.ok) throw new Error("Backend not responding");
                 const data = await response.json();
-                
                 allReleases = data.releases || [];
-
-                if (allReleases.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-zinc-400">No contracts found.</td></tr>';
-                    return;
-                }
-                renderTable(allReleases.slice(0, 20));
+                renderTable(allReleases.slice(0, 30));
             } catch (error) {
-                console.error("Connection failed:", error);
-                tbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-red-400">Failed to connect to Java Backend.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-red-400">Connection Failed. Check terminal.</td></tr>';
             }
         }
 
-        // --- SORTING LOGIC ---
-        function sortByValue() {
-            allReleases.sort((a, b) => {
-                const valA = a.tender?.value?.amount || 0;
-                const valB = b.tender?.value?.amount || 0;
-                return sortDescending ? valB - valA : valA - valB;
-            });
-            
-            sortDescending = !sortDescending;
-            
-            const searchInput = document.getElementById('global-search').value.toLowerCase();
-            const filteredData = allReleases.filter(release => {
-                const title = (release.tender?.title || "").toLowerCase();
-                const buyerName = (release.parties?.find(p => p.roles?.includes('buyer'))?.name || "").toLowerCase();
-                return title.includes(searchInput) || buyerName.includes(searchInput);
-            });
-            
-            renderTable(filteredData.slice(0, 20));
+        async function saveProfile() {
+            const keyword = document.getElementById('global-search').value;
+            if (!keyword) return alert("Type a keyword first!");
+            try {
+                await fetch('/api/profiles/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword: keyword })
+                });
+                alert("Success! Profile saved for: " + keyword);
+            } catch (err) { alert("Error saving profile."); }
         }
 
-        function renderTable(releasesToRender) {
+        function getStatusTag(dateStr) {
+            if (!dateStr) return `<span class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-500 text-[10px] uppercase">Ongoing</span>`;
+            const diffDays = Math.ceil((new Date(dateStr) - new Date()) / (86400000));
+            if (diffDays < 0) return `<span class="px-2 py-0.5 rounded bg-red-900/20 text-red-400 text-[10px] border border-red-800/50 uppercase font-semibold">Closed</span>`;
+            if (diffDays <= 14) return `<span class="px-2 py-0.5 rounded bg-orange-900/20 text-orange-400 text-[10px] border border-orange-800/50 uppercase font-semibold">Urgent</span>`;
+            return `<span class="px-2 py-0.5 rounded bg-emerald-900/20 text-emerald-400 text-[10px] border border-emerald-800/50 uppercase font-semibold">Open</span>`;
+        }
+
+        function renderTable(data) {
             const tbody = document.getElementById('table-body');
+            document.getElementById('results-count').innerText = "Found: " + data.length;
             tbody.innerHTML = ''; 
-
-            if (releasesToRender.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-zinc-500">No matches found.</td></tr>';
-                return;
-            }
-
-            releasesToRender.forEach(release => {
-                const title = release.tender?.title || "Title Not Disclosed";
-                const published = release.date ? release.date.split('T')[0] : "N/A";
-                const closing = release.tender?.tenderPeriod?.endDate ? release.tender.tenderPeriod.endDate.split('T')[0] : "Open";
-                const rawValue = release.tender?.value?.amount;
-                const value = rawValue ? '£' + rawValue.toLocaleString() : "TBA";
-                const buyer = release.parties?.find(p => p.roles?.includes('buyer'));
-                const location = buyer ? buyer.name : "UK Gov";
-                const type = release.tender?.mainProcurementCategory || "service";
+            data.forEach(r => {
+                const title = (r.tender?.title || "Contract Notice").substring(0, 50) + "...";
+                const closing = r.tender?.tenderPeriod?.endDate ? r.tender.tenderPeriod.endDate.split('T')[0] : 'Open';
+                const s = r.tender?.contractPeriod?.startDate;
+                const e = r.tender?.contractPeriod?.endDate;
+                let duration = "TBA";
+                if(s && e) {
+                    const months = (new Date(e).getFullYear() - new Date(s).getFullYear()) * 12 + (new Date(e).getMonth() - new Date(s).getMonth());
+                    duration = months > 0 ? months + "m" : "Short";
+                }
+                const value = r.tender?.value?.amount ? '£' + r.tender.value.amount.toLocaleString() : "TBA";
+                const buyer = (r.parties?.find(p => p.roles?.includes('buyer'))?.name || "UK Gov").substring(0, 25);
 
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-zinc-800/80 border-b border-zinc-800/50 transition-colors group';
+                row.className = 'hover:bg-zinc-800/40 border-b border-zinc-900 transition-colors';
                 row.innerHTML = `
-                    <td class="py-4 px-4 font-medium text-[#0CBFCA]" title="${title}">${title.substring(0, 50)}...</td>
-                    <td class="py-4 px-4 text-zinc-400">${published}</td>
-                    <td class="py-4 px-4 text-zinc-400">${closing}</td>
-                    <td class="py-4 px-4 font-mono">${value}</td>
-                    <td class="py-4 px-4" title="${location}">${location.substring(0, 30)}</td>
-                    <td class="py-4 px-4 font-mono text-zinc-500">
-                        <button class="view-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 hover:text-white rounded-md transition-colors border border-zinc-700">View Details</button>
-                    </td>
-                    <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs bg-zinc-800 text-zinc-300 capitalize border border-zinc-700">${type}</span></td>
+                    <td class="py-4 px-4 font-medium text-[#0CBFCA] cursor-pointer" onclick='openModal(${JSON.stringify(r).replace(/'/g, "&apos;")})'>${title}</td>
+                    <td class="py-4 px-4">${getStatusTag(r.tender?.tenderPeriod?.endDate)}</td>
+                    <td class="py-4 px-4 text-zinc-400 font-mono">${closing}</td>
+                    <td class="py-4 px-4 text-zinc-500 font-mono text-xs">${duration}</td>
+                    <td class="py-4 px-4 font-mono text-white font-semibold">${value}</td>
+                    <td class="py-4 px-4 text-zinc-400 text-xs">${buyer}</td>
+                    <td class="py-4 px-4"><button class="view-btn text-xs bg-zinc-800 px-3 py-1 rounded border border-zinc-700 hover:text-white transition-all">VIEW</button></td>
                 `;
-                row.querySelector('.view-btn').addEventListener('click', () => openModal(release));
+                row.querySelector('.view-btn').onclick = () => openModal(r);
                 tbody.appendChild(row);
             });
         }
 
-        // --- MODAL LOGIC ---
-        function openModal(release) {
-            const title = release.tender?.title || "Title Not Disclosed";
-            const desc = release.tender?.description || "No specific description provided by the buyer.";
-            const buyer = release.parties?.find(p => p.roles?.includes('buyer'));
-            const buyerName = buyer ? buyer.name : "Unknown Buyer";
-            const cpvId = release.tender?.items?.[0]?.classification?.id || release.tender?.mainProcurementCategory || "N/A";
-            const cpvDesc = release.tender?.items?.[0]?.classification?.description || "No specific classification";
-            
-            const ftsLink = "https://www.find-tender.service.gov.uk/Notice/" + (release.tender?.id || "");
+        function sortByValue() {
+            allReleases.sort((a, b) => (b.tender?.value?.amount || 0) - (a.tender?.value?.amount || 0));
+            renderTable(allReleases.slice(0, 30));
+        }
 
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-desc').innerText = desc;
-            document.getElementById('modal-buyer').innerText = buyerName;
-            document.getElementById('modal-cpv').innerText = cpvId + " - " + cpvDesc;
-            
-            const linkElement = document.getElementById('modal-link');
-            linkElement.href = ftsLink;
-            linkElement.innerText = ftsLink;
-
-            const modal = document.getElementById('details-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+        function openModal(r) {
+            document.getElementById('modal-title').innerText = r.tender?.title || "No Title";
+            document.getElementById('modal-desc').innerText = r.tender?.description || "No description provided.";
+            document.getElementById('modal-buyer').innerText = r.parties?.find(p => p.roles?.includes('buyer'))?.name || "UK Gov";
+            document.getElementById('modal-start').innerText = r.tender?.contractPeriod?.startDate ? r.tender.contractPeriod.startDate.split('T')[0] : "TBA";
+            document.getElementById('modal-end').innerText = r.tender?.contractPeriod?.endDate ? r.tender.contractPeriod.endDate.split('T')[0] : "TBA";
+            const link = "https://www.find-tender.service.gov.uk/Notice/" + (r.tender?.id || "");
+            const linkEl = document.getElementById('modal-link');
+            linkEl.href = link; linkEl.innerText = link;
+            document.getElementById('details-modal').classList.remove('hidden');
+            document.getElementById('details-modal').classList.add('flex');
         }
 
         function closeModal() {
-            const modal = document.getElementById('details-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            document.getElementById('details-modal').classList.add('hidden');
+            document.getElementById('details-modal').classList.remove('flex');
         }
 
-        // --- SEARCH LOGIC ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('global-search');
-            searchInput.addEventListener('input', (event) => {
-                const keyword = event.target.value.toLowerCase();
-                const filteredData = allReleases.filter(release => {
-                    const title = (release.tender?.title || "").toLowerCase();
-                    const buyerName = (release.parties?.find(p => p.roles?.includes('buyer'))?.name || "").toLowerCase();
-                    return title.includes(keyword) || buyerName.includes(keyword);
-                });
-                renderTable(filteredData.slice(0, 20));
-            });
+        document.getElementById('global-search').addEventListener('input', (e) => {
+            const k = e.target.value.toLowerCase();
+            const filtered = allReleases.filter(r => (r.tender?.title || "").toLowerCase().includes(k) || (r.parties?.find(p => p.roles?.includes('buyer'))?.name || "").toLowerCase().includes(k));
+            renderTable(filtered.slice(0, 30));
         });
 
         window.onload = fetchAndRenderLiveData;
