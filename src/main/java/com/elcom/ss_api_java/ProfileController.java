@@ -16,9 +16,7 @@ public class ProfileController {
     @Autowired
     private CpvImporter cpvImporter;
 
-    // THE FIX: This forces the database to build the correct buckets right before saving
     private void ensureTableExists() {
-        // 1. Create the table if it doesn't exist at all
         jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS search_profiles (" +
             "id INT AUTO_INCREMENT PRIMARY KEY, " +
             "name VARCHAR(255), " +
@@ -31,12 +29,10 @@ public class ProfileController {
             "cpv_codes TEXT" +
         ")");
         
-        // 2. Safely add the 'name' column if the table is from our older version
-        try {
-            jdbcTemplate.execute("ALTER TABLE search_profiles ADD COLUMN name VARCHAR(255) AFTER id");
-        } catch (Exception e) {
-            // If it throws an error, it just means the column is already there. Safe to ignore!
-        }
+        // Safely auto-upgrade the database schema for the new Early Engagement dates!
+        try { jdbcTemplate.execute("ALTER TABLE search_profiles ADD COLUMN name VARCHAR(255) AFTER id"); } catch (Exception e) {}
+        try { jdbcTemplate.execute("ALTER TABLE search_profiles ADD COLUMN expiry_from VARCHAR(50)"); } catch (Exception e) {}
+        try { jdbcTemplate.execute("ALTER TABLE search_profiles ADD COLUMN expiry_to VARCHAR(50)"); } catch (Exception e) {}
     }
 
     @GetMapping("/import-cpv")
@@ -46,29 +42,37 @@ public class ProfileController {
 
     @GetMapping("/cpv-search")
     public List<Map<String, Object>> searchCpv(@RequestParam String q) {
-        String query = "SELECT code, description FROM cpv_codes WHERE LOWER(description) LIKE LOWER(?) OR code LIKE ? LIMIT 10";
-        return jdbcTemplate.queryForList(query, "%" + q + "%", q + "%");
+        String term = q.trim().toLowerCase();
+        String query = "SELECT code, description FROM cpv_codes " +
+                       "WHERE LOWER(description) LIKE ? OR code LIKE ? " +
+                       "ORDER BY " +
+                       "  CASE " +
+                       "    WHEN LOWER(description) LIKE ? THEN 1 " +
+                       "    WHEN LOWER(description) LIKE ? THEN 2 " +
+                       "    ELSE 3 " +
+                       "  END, description ASC LIMIT 25";
+        return jdbcTemplate.queryForList(query, "%" + term + "%", term + "%", term + "%", "% " + term + "%");
     }
 
     @PostMapping("/save")
     public Map<String, String> saveProfile(@RequestBody Map<String, Object> req) {
-        ensureTableExists(); // Ensure the database is ready!
-        String sql = "INSERT INTO search_profiles (name, keyword, excluded_keywords, min_value, max_value, regions, notice_types, cpv_codes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, req.get("name"), req.get("keyword"), req.get("excluded_keywords"), req.get("min_value"), req.get("max_value"), req.get("regions"), req.get("notice_types"), req.get("cpv_codes"));
+        ensureTableExists(); 
+        String sql = "INSERT INTO search_profiles (name, keyword, excluded_keywords, min_value, max_value, regions, notice_types, cpv_codes, expiry_from, expiry_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, req.get("name"), req.get("keyword"), req.get("excluded_keywords"), req.get("min_value"), req.get("max_value"), req.get("regions"), req.get("notice_types"), req.get("cpv_codes"), req.get("expiry_from"), req.get("expiry_to"));
         return Map.of("status", "success");
     }
 
     @PutMapping("/edit/{id}")
     public Map<String, String> editProfile(@PathVariable Long id, @RequestBody Map<String, Object> req) {
-        ensureTableExists(); // Ensure the database is ready!
-        String sql = "UPDATE search_profiles SET name=?, keyword=?, excluded_keywords=?, min_value=?, max_value=?, regions=?, cpv_codes=? WHERE id=?";
-        jdbcTemplate.update(sql, req.get("name"), req.get("keyword"), req.get("excluded_keywords"), req.get("min_value"), req.get("max_value"), req.get("regions"), req.get("cpv_codes"), id);
+        ensureTableExists(); 
+        String sql = "UPDATE search_profiles SET name=?, keyword=?, excluded_keywords=?, min_value=?, max_value=?, regions=?, notice_types=?, cpv_codes=?, expiry_from=?, expiry_to=? WHERE id=?";
+        jdbcTemplate.update(sql, req.get("name"), req.get("keyword"), req.get("excluded_keywords"), req.get("min_value"), req.get("max_value"), req.get("regions"), req.get("notice_types"), req.get("cpv_codes"), req.get("expiry_from"), req.get("expiry_to"), id);
         return Map.of("status", "success");
     }
 
     @GetMapping("/list")
     public List<Map<String, Object>> listProfiles() {
-        ensureTableExists(); // Ensure the database is ready!
+        ensureTableExists(); 
         return jdbcTemplate.queryForList("SELECT * FROM search_profiles ORDER BY id DESC");
     }
 
