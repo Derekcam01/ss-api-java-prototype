@@ -6,11 +6,21 @@
     <title>MultiQuote • Elcom Intelligence Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { 'elcom-blue': '#006A8D', 'elcom-orange': '#E07C16', 'elcom-main-bg': '#F4F4F5' } } }
+            theme: {
+                extend: {
+                    colors: {
+                        'elcom-blue': '#006A8D',
+                        'elcom-orange': '#E07C16',
+                        'elcom-main-bg': '#F4F4F5'
+                    }
+                }
+            }
         }
     </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600&display=swap');
         .logo-font { font-family: 'Space Grotesk', sans-serif; }
@@ -22,31 +32,31 @@
 
     <div id="details-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[100] p-4 modal-blur">
         <div class="bg-white border border-zinc-200 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            <div class="p-6 border-b border-zinc-100 flex justify-between items-center bg-zinc-50">
-                <div class="flex flex-col">
+            <div class="p-6 border-b border-zinc-100 flex justify-between items-start bg-zinc-50 gap-4">
+                <div class="flex flex-col flex-1 min-w-0">
                     <span class="text-elcom-blue text-[10px] font-bold uppercase tracking-widest mb-1">Ref: <span id="modal-ref" class="font-mono">---</span></span>
-                    <h2 id="modal-title" class="text-xl font-bold text-zinc-950 pr-8 truncate">Contract Detail</h2>
+                    <h2 id="modal-title" class="text-xl font-bold text-zinc-950 truncate pr-2">Contract Detail</h2>
                 </div>
-                <button onclick="closeModal()" class="text-zinc-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-circle-xmark text-2xl"></i></button>
+                <button onclick="closeModal()" class="text-zinc-400 hover:text-red-500 transition-colors shrink-0 mt-1"><i class="fa-solid fa-circle-xmark text-2xl"></i></button>
             </div>
             <div class="p-8 overflow-y-auto flex-1 custom-scrollbar grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="md:col-span-2 space-y-8">
                     <h3 class="text-zinc-950 text-[10px] font-bold uppercase tracking-widest opacity-60">Description</h3>
-                    <p id="modal-desc" class="text-zinc-700 text-sm whitespace-pre-wrap leading-relaxed">...</p>
+                    <p id="modal-desc" class="text-zinc-700 text-sm whitespace-pre-wrap leading-relaxed break-words">...</p>
                 </div>
                 <div class="bg-zinc-50 rounded-2xl p-6 border border-zinc-100 h-fit space-y-6 shadow-inner">
                     <div>
                         <h4 class="text-[10px] font-bold text-zinc-500 uppercase mb-2">Buyer</h4>
-                        <div id="modal-buyer" class="text-zinc-950 font-bold text-sm">---</div>
+                        <div id="modal-buyer" class="text-zinc-950 font-bold text-sm break-words">---</div>
                         <div id="modal-contact-wrapper" class="hidden flex flex-col gap-2 mt-4 pt-4 border-t border-zinc-200/60">
                             <h4 class="text-[9px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Point of Contact</h4>
                             <div id="modal-contact-name" class="text-xs font-semibold text-zinc-800 hidden"></div>
-                            <a id="modal-contact-email" href="#" class="text-[11px] font-medium text-elcom-blue hover:underline hidden flex items-center gap-1.5"><i class="fa-solid fa-envelope opacity-70"></i> <span></span></a>
-                            <div id="modal-contact-phone" class="text-[11px] text-zinc-600 hidden flex items-center gap-1.5"><i class="fa-solid fa-phone opacity-70"></i> <span></span></div>
+                            <a id="modal-contact-email" href="#" class="text-[11px] font-medium text-elcom-blue hover:underline hidden flex items-center gap-1.5 break-all"><i class="fa-solid fa-envelope opacity-70 shrink-0"></i> <span class="truncate"></span></a>
+                            <div id="modal-contact-phone" class="text-[11px] text-zinc-600 hidden flex items-center gap-1.5"><i class="fa-solid fa-phone opacity-70 shrink-0"></i> <span></span></div>
                         </div>
                     </div>
                     <hr class="border-zinc-100">
-                    <div><h4 class="text-[10px] font-bold text-zinc-500 uppercase mb-2">CPV Classification</h4><div class="text-elcom-blue font-mono text-xs leading-relaxed" id="modal-cpv">---</div></div>
+                    <div><h4 class="text-[10px] font-bold text-zinc-500 uppercase mb-2">CPV Classification</h4><div class="text-elcom-blue font-mono text-xs leading-relaxed break-words" id="modal-cpv">---</div></div>
                     <hr class="border-zinc-100">
                     <div class="grid grid-cols-1 gap-4">
                         <div><h4 class="text-[10px] font-bold text-zinc-500 uppercase mb-1">Est. Start Date</h4><div id="modal-start" class="text-emerald-600 font-mono text-sm font-semibold">---</div></div>
@@ -62,12 +72,12 @@
 
     <div id="profile-panel" class="fixed inset-y-0 right-0 w-[480px] bg-white border-l border-zinc-100 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col modal-blur">
         <div class="p-6 border-b border-zinc-100 flex justify-between items-center bg-zinc-50">
-            <h2 class="text-xl font-bold text-zinc-950 uppercase tracking-tighter">Saved Search Builder</h2>
+            <h2 class="text-xl font-bold text-zinc-950 uppercase tracking-tighter">Advanced Search Builder</h2>
             <button onclick="togglePanel(false)" class="text-zinc-400 hover:text-elcom-blue transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
         <div class="p-8 space-y-6 overflow-y-auto flex-1 custom-scrollbar bg-white">
             <input type="hidden" id="profile-id">
-            <div><label class="text-[10px] font-bold text-elcom-blue uppercase block mb-2">Profile Name</label><input id="profile-name" class="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-950 focus:border-elcom-blue focus:ring-1 focus:ring-elcom-blue outline-none transition-all placeholder:text-zinc-300"></div>
+            <div><label class="text-[10px] font-bold text-elcom-blue uppercase block mb-2">Profile Name (Optional)</label><input id="profile-name" placeholder="e.g. IT Hardware Q3" class="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-950 focus:border-elcom-blue focus:ring-1 focus:ring-elcom-blue outline-none transition-all placeholder:text-zinc-300"></div>
             <div>
                 <label class="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">Notice Stage</label>
                 <select id="notice-type-input" class="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm outline-none text-zinc-950 focus:border-elcom-blue focus:ring-1 focus:ring-elcom-blue">
@@ -105,7 +115,11 @@
                 <div id="cpv-results" class="mt-2 bg-white border border-zinc-100 rounded-xl hidden max-h-40 overflow-auto z-50 shadow-lg"></div>
             </div>
         </div>
-        <div class="p-6 border-t border-zinc-100 bg-zinc-50"><button onclick="saveAdvancedProfile()" class="w-full py-4 bg-elcom-orange text-white font-black rounded-2xl uppercase tracking-widest hover:brightness-110 transition-all shadow-md">Save Intelligence Profile</button></div>
+        
+        <div class="p-6 border-t border-zinc-100 bg-zinc-50 flex flex-col gap-3">
+            <button onclick="runPreviewSearch()" class="w-full py-3.5 bg-white border-2 border-elcom-blue text-elcom-blue font-black rounded-2xl uppercase tracking-widest hover:bg-elcom-blue hover:text-white transition-all shadow-sm">Run Advanced Search</button>
+            <button onclick="saveAdvancedProfile()" class="w-full py-4 bg-elcom-orange text-white font-black rounded-2xl uppercase tracking-widest hover:brightness-110 transition-all shadow-md">Save Profile & Alerts</button>
+        </div>
     </div>
 
     <div class="w-68 bg-elcom-blue flex flex-col p-6 z-10 shadow-2xl">
@@ -118,7 +132,6 @@
         <nav class="space-y-4">
             <button onclick="showSection('discover')" id="nav-discover" class="w-full flex items-center gap-x-4 px-5 py-4 rounded-2xl bg-white/10 text-white font-bold transition-all shadow-inner"><i class="fa-solid fa-compass"></i><span>DISCOVER</span></button>
             <button onclick="showSection('profiles')" id="nav-profiles" class="w-full flex items-center gap-x-4 px-5 py-4 rounded-2xl text-white/70 hover:bg-white/5 transition-all"><i class="fa-solid fa-bolt"></i><span>MY PROFILES</span></button>
-            
             <button onclick="showSection('early')" id="nav-early" class="w-full flex items-center gap-x-4 px-5 py-4 rounded-2xl text-white/70 hover:bg-white/5 transition-all mt-4 border border-white/10"><i class="fa-solid fa-handshake"></i><span class="text-sm">EARLY ENGAGEMENT</span></button>
         </nav>
     </div>
@@ -131,16 +144,15 @@
             </div>
             <div class="flex items-center gap-6 ml-4">
                 <div id="results-count" class="text-[10px] font-mono text-white/80 uppercase bg-white/10 px-4 py-1.5 rounded-full border border-white/5">Results: 0</div>
-                <button onclick="openNewProfile()" class="px-5 py-2.5 bg-elcom-orange text-white rounded-full text-[11px] font-bold uppercase transition-all hover:bg-white hover:text-elcom-orange shadow-md">Create Profile</button>
+                <button onclick="openNewProfile()" class="px-5 py-2.5 bg-elcom-orange text-white rounded-full text-[11px] font-bold uppercase transition-all hover:bg-white hover:text-elcom-orange shadow-md">Advanced Search</button>
             </div>
         </header>
 
         <main class="flex-1 overflow-auto p-8 bg-elcom-main-bg flex flex-col">
-            
             <div id="view-discover" class="flex-1 flex flex-col">
                 <div id="active-filter-banner" class="hidden bg-white border border-zinc-200 rounded-2xl p-6 mb-8 flex justify-between items-center shadow-lg shrink-0">
                     <div class="flex items-center gap-8">
-                        <div><span class="text-elcom-blue text-[10px] font-bold uppercase mb-1 block">Active Saved Profile</span><div id="active-filter-name" class="text-zinc-950 font-black text-2xl tracking-tighter">---</div></div>
+                        <div><span class="text-elcom-blue text-[10px] font-bold uppercase mb-1 block" id="active-filter-type">Active Saved Profile</span><div id="active-filter-name" class="text-zinc-950 font-black text-2xl tracking-tighter">---</div></div>
                         <div class="h-10 w-px bg-zinc-100"></div>
                         <div><span class="text-zinc-600 text-[10px] font-bold uppercase mb-1 block">Visible Pipeline Value</span><div class="text-elcom-blue font-mono text-2xl font-bold" id="total-value-sum">£0</div></div>
                     </div>
@@ -156,6 +168,7 @@
                             <thead class="sticky top-0 bg-zinc-50 z-10">
                                 <tr class="text-zinc-600 border-b border-zinc-200 uppercase text-[10px] tracking-widest">
                                     <th class="py-4 px-6 w-1/3">Opportunity</th>
+                                    <th class="py-4 px-6">Published</th>
                                     <th class="py-4 px-6">Type</th>
                                     <th class="py-4 px-6">Deadline</th>
                                     <th class="py-4 px-6">Contract Dates</th>
@@ -189,7 +202,6 @@
                 <p class="text-sm text-zinc-500 mb-6 -mt-4">Profiles searching for expiring contracts to target pre-tender engagement.</p>
                 <div id="early-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
-
         </main>
     </div>
 
@@ -204,7 +216,6 @@
         const rowsPerPage = 25; 
         let searchTimeout; 
 
-        // UPDATED SECTION LOGIC
         function showSection(section) {
             document.getElementById('view-discover').classList.toggle('hidden', section !== 'discover');
             document.getElementById('view-profiles').classList.toggle('hidden', section !== 'profiles');
@@ -228,17 +239,19 @@
         function togglePanel(open) { document.getElementById('profile-panel').style.transform = open ? "translateX(0)" : "translateX(100%)"; }
         function safeStr(val) { return (!val || String(val).toLowerCase() === 'null' || String(val).toLowerCase() === 'undefined') ? "" : String(val).trim(); }
 
+        // UPDATED: Now extracts the primary Published Date from the OCDS release
         function getNoticeData(r) {
             const amount = r.tender?.value?.amount || r.awards?.[0]?.value?.amount || 0;
             const startDate = r.tender?.contractPeriod?.startDate || r.awards?.[0]?.contractPeriod?.startDate || "";
             const endDate = r.tender?.contractPeriod?.endDate || r.awards?.[0]?.contractPeriod?.endDate || "";
+            const publishDate = r.date || ""; 
             let cpvId = r.tender?.items?.[0]?.classification?.id || r.cpvCode || "";
             let cpvDesc = r.tender?.items?.[0]?.classification?.description || "";
             if (!cpvId && r.awards?.[0]?.items?.[0]?.additionalClassifications?.length > 0) {
                 cpvId = r.awards[0].items[0].additionalClassifications[0].id || "";
                 cpvDesc = r.awards[0].items[0].additionalClassifications[0].description || "";
             }
-            return { amount, startDate, endDate, cpvId, cpvDesc };
+            return { amount, startDate, endDate, publishDate, cpvId, cpvDesc };
         }
 
         function getSearchMatches(item, incTags, excTags, cpvTags, stage) {
@@ -292,12 +305,67 @@
             }, 300);
         }
 
-        // UPDATED TO FILTER BY CONTRACT END DATES
+        async function runPreviewSearch() {
+            const getVal = (id) => document.getElementById(id).value.trim();
+            
+            const rawInc = getVal('keyword-input');
+            let tempIncludeTags = [...includeTags];
+            if (rawInc) tempIncludeTags.push(rawInc);
+            const keywordStr = tempIncludeTags.join(',');
+
+            const rawExc = getVal('exclude-input');
+            let tempExcludeTags = [...excludeTags];
+            if (rawExc) tempExcludeTags.push(rawExc);
+
+            const stage = getVal('notice-type-input').toLowerCase();
+            const minV = Number(getVal('min-val')) || 0;
+            const maxV = Number(getVal('max-val')) || 1000000000;
+            
+            const expFromStr = getVal('expiry-from');
+            const expToStr = getVal('expiry-to');
+            const expFrom = expFromStr ? new Date(expFromStr) : null;
+            const expTo = expToStr ? new Date(expToStr) : null;
+
+            let backendResults = [];
+            try {
+                const res = await fetch('/api/vault-search', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: keywordStr })
+                });
+                const data = await res.json();
+                backendResults = data.releases || [];
+            } catch (err) { return; }
+
+            const finalFiltered = backendResults.filter(r => {
+                const { amount, endDate } = getNoticeData(r);
+                const matchBudget = (amount >= minV && amount <= maxV);
+                const matchContent = getSearchMatches(r, tempIncludeTags, tempExcludeTags, cpvTags, stage);
+                
+                let matchDate = true;
+                if (expFrom || expTo) {
+                    if (!endDate) { matchDate = false; } else {
+                        const cEnd = new Date(endDate);
+                        if (expFrom && cEnd < expFrom) matchDate = false;
+                        if (expTo && cEnd > expTo) matchDate = false;
+                    }
+                }
+                return matchBudget && matchContent && matchDate;
+            });
+
+            showSection('discover');
+            document.getElementById('active-filter-banner').classList.remove('hidden');
+            document.getElementById('active-filter-type').innerText = "Active Advanced Search";
+            document.getElementById('active-filter-name').innerText = getVal('profile-name') || "Unsaved Preview Query";
+            
+            renderTable(finalFiltered, true);
+            togglePanel(false);
+        }
+
         async function activateFilterById(id) {
             const p = allProfilesData.find(x => x.id === id);
             if (!p) return;
             showSection('discover');
             document.getElementById('active-filter-banner').classList.remove('hidden');
+            document.getElementById('active-filter-type').innerText = "Active Saved Profile";
             document.getElementById('active-filter-name').innerText = p.name;
             
             const rawKeywords = safeStr(p.keyword);
@@ -315,7 +383,6 @@
             const minV = Number(p.min_value) || 0;
             const maxV = Number(p.max_value) || 1000000000;
             
-            // New Date Logic
             const expFromStr = safeStr(p.expiry_from);
             const expToStr = safeStr(p.expiry_to);
             const expFrom = expFromStr ? new Date(expFromStr) : null;
@@ -328,9 +395,7 @@
                 
                 let matchDate = true;
                 if (expFrom || expTo) {
-                    if (!endDate) {
-                        matchDate = false; 
-                    } else {
+                    if (!endDate) { matchDate = false; } else {
                         const cEnd = new Date(endDate);
                         if (expFrom && cEnd < expFrom) matchDate = false;
                         if (expTo && cEnd > expTo) matchDate = false;
@@ -358,7 +423,8 @@
             document.getElementById('total-value-sum').innerText = "£" + Math.round(totalVal).toLocaleString();
             
             if(total === 0) { 
-                tbody.innerHTML = `<tr><td colspan="6" class="py-20 text-center text-zinc-400 uppercase font-bold tracking-widest bg-white">No matching records found.</td></tr>`; 
+                // Adjusted colspan for the new Published column
+                tbody.innerHTML = `<tr><td colspan="7" class="py-20 text-center text-zinc-400 uppercase font-bold tracking-widest bg-white">No matching records found.</td></tr>`; 
                 document.getElementById('page-start').innerText = 0;
                 document.getElementById('page-end').innerText = 0;
                 document.getElementById('page-total').innerText = 0;
@@ -374,7 +440,7 @@
             const pageData = data.slice(startIdx, endIdx);
 
             tbody.innerHTML = pageData.map(r => {
-                const { amount, startDate, endDate } = getNoticeData(r);
+                const { amount, startDate, endDate, publishDate } = getNoticeData(r);
                 const title = (r.tender?.title || "No Title").substring(0, 70);
                 const buyer = (r.parties?.find(p => p.roles?.includes('buyer'))?.name || "UK Gov Agency").substring(0, 35);
                 
@@ -395,6 +461,9 @@
                     else statusTag = `<div class="text-xs text-zinc-950 font-medium"><i class="fa-solid fa-circle text-emerald-600 text-[8px] mr-1.5"></i> Open <span class="text-zinc-500 block text-[10px] mt-0.5 ml-3">${dateStr}</span></div>`;
                 }
 
+                // NEW: Published Date Formatting
+                const pubDateStr = publishDate ? new Date(publishDate).toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: '2-digit'}) : '<span class="italic text-zinc-300">--</span>';
+                
                 const cStart = startDate ? new Date(startDate).toLocaleDateString('en-GB', {month: 'short', year: '2-digit'}) : '';
                 const cEnd = endDate ? new Date(endDate).toLocaleDateString('en-GB', {month: 'short', year: '2-digit'}) : '';
                 const contractDates = (startDate || endDate) ? `<div class="text-xs text-zinc-700 whitespace-nowrap">${cStart || '--'} &rarr;<br>${cEnd || '--'}</div>` : `<span class="text-zinc-400 text-[10px] italic uppercase tracking-widest">Unspecified</span>`;
@@ -403,6 +472,7 @@
                 return `
                     <tr class="hover:bg-zinc-50 transition-colors group cursor-pointer border-b border-zinc-100 bg-white" onclick='openModalById("${r.ocid}")'>
                         <td class="py-4 px-6 font-semibold text-elcom-blue group-hover:underline leading-snug pr-6">${title}...</td>
+                        <td class="py-4 px-6 text-zinc-600 text-xs font-medium whitespace-nowrap">${pubDateStr}</td>
                         <td class="py-4 px-6">${typeBadge}</td>
                         <td class="py-4 px-6">${statusTag}</td>
                         <td class="py-4 px-6">${contractDates}</td>
@@ -428,11 +498,13 @@
         }
         function removeTag(containerId, index) { if(containerId === 'include-tags') { includeTags.splice(index, 1); renderTags(containerId, includeTags); } else { excludeTags.splice(index, 1); renderTags(containerId, excludeTags); } }
         async function fetchTenders() { const res = await fetch('/api/live-data'); const data = await res.json(); allReleases = data.releases || []; renderTable(allReleases, true); }
+        
+        // UPDATED: CSV Export to include the Published Date
         function exportToCSV() {
-            const rows = [["Opportunity", "Notice Type", "Buyer", "Value", "Start Date", "End Date", "Description"]];
+            const rows = [["Opportunity", "Published Date", "Notice Type", "Buyer", "Value", "Start Date", "End Date", "Description"]];
             currentFilteredResults.forEach(r => {
-                const { amount, startDate, endDate } = getNoticeData(r);
-                rows.push([ `"${r.tender?.title || ''}"`, `"${(r.tag || []).join(', ')}"`, `"${r.parties?.find(p => p.roles?.includes('buyer'))?.name || ''}"`, amount, `"${startDate}"`, `"${endDate}"`, `"${(r.tender?.description || '').replace(/"/g, '""')}"` ]);
+                const { amount, startDate, endDate, publishDate } = getNoticeData(r);
+                rows.push([ `"${r.tender?.title || ''}"`, `"${publishDate}"`, `"${(r.tag || []).join(', ')}"`, `"${r.parties?.find(p => p.roles?.includes('buyer'))?.name || ''}"`, amount, `"${startDate}"`, `"${endDate}"`, `"${(r.tender?.description || '').replace(/"/g, '""')}"` ]);
             });
             let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
             const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", "MultiQuote_Export.csv"); link.click();
@@ -482,7 +554,6 @@
         function selectCpv(code, desc) { const tag = `${code} - ${desc}`; if (!cpvTags.includes(tag)) { cpvTags.push(tag); renderCpvTags(); } document.getElementById('cpv-input').value = ''; document.getElementById('cpv-results').classList.add('hidden'); }
         function renderCpvTags() { document.getElementById('cpv-tags').innerHTML = cpvTags.map((tag, i) => `<div class="px-3 py-2 bg-zinc-100 border border-zinc-200 rounded-lg flex justify-between items-center group text-xs text-zinc-700 truncate shadow-sm">${tag}<i class="fa-solid fa-xmark cursor-pointer ml-2 hover:text-red-500" onclick="cpvTags.splice(${i},1);renderCpvTags()"></i></div>`).join(''); }
 
-        // UPDATED: Clear new date inputs
         function openNewProfile() {
             document.getElementById('profile-id').value = ""; document.getElementById('profile-name').value = ""; document.getElementById('notice-type-input').value = "";
             document.getElementById('min-val').value = 0; document.getElementById('max-val').value = 100000000;
@@ -490,7 +561,6 @@
             includeTags = []; excludeTags = []; cpvTags = []; renderTags('include-tags', includeTags); renderTags('exclude-tags', excludeTags); renderCpvTags(); togglePanel(true);
         }
 
-        // UPDATED: Save new date inputs
         async function saveAdvancedProfile() {
             const getVal = (id) => document.getElementById(id).value.trim();
             const rawInc = getVal('keyword-input'); if(rawInc) includeTags.push(rawInc);
@@ -505,7 +575,6 @@
             togglePanel(false); showSection('early'); 
         }
 
-        // UPDATED: Split profiles between standard and early engagement!
         async function loadProfiles() {
             const res = await fetch('/api/profiles/list'); allProfilesData = await res.json();
             
@@ -513,11 +582,7 @@
             const earlyProfiles = [];
             
             allProfilesData.forEach(p => {
-                if (safeStr(p.expiry_from) || safeStr(p.expiry_to)) {
-                    earlyProfiles.push(p);
-                } else {
-                    standardProfiles.push(p);
-                }
+                if (safeStr(p.expiry_from) || safeStr(p.expiry_to)) { earlyProfiles.push(p); } else { standardProfiles.push(p); }
             });
 
             const renderCard = (p) => {
@@ -543,7 +608,6 @@
             document.getElementById('early-list').innerHTML = earlyProfiles.length ? earlyProfiles.map(renderCard).join('') : '<p class="text-zinc-500 italic">No early engagement trackers created yet.</p>';
         }
 
-        // UPDATED: Load new date inputs
         function editProfile(id, ev) {
             ev.stopPropagation(); const p = allProfilesData.find(x => x.id === id); if(!p) return;
             const setVal = (id, val) => document.getElementById(id).value = val;
