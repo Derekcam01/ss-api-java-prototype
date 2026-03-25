@@ -168,11 +168,11 @@
                             <thead class="sticky top-0 bg-zinc-50 z-10">
                                 <tr class="text-zinc-600 border-b border-zinc-200 uppercase text-[10px] tracking-widest">
                                     <th class="py-4 px-6 w-1/3">Opportunity</th>
-                                    <th class="py-4 px-6">Published</th>
+                                    <th class="py-4 px-6 cursor-pointer hover:text-elcom-blue transition-colors group select-none" onclick="sortTable('date')">Published <i class="fa-solid fa-sort ml-1 opacity-50 group-hover:opacity-100"></i></th>
                                     <th class="py-4 px-6">Type</th>
                                     <th class="py-4 px-6">Deadline</th>
                                     <th class="py-4 px-6">Contract Dates</th>
-                                    <th class="py-4 px-6">Value</th>
+                                    <th class="py-4 px-6 cursor-pointer hover:text-elcom-blue transition-colors group select-none" onclick="sortTable('value')">Value <i class="fa-solid fa-sort ml-1 opacity-50 group-hover:opacity-100"></i></th>
                                     <th class="py-4 px-6 text-right">Buyer</th>
                                 </tr>
                             </thead>
@@ -216,6 +216,10 @@
         const rowsPerPage = 25; 
         let searchTimeout; 
 
+        // SORTING STATE
+        let sortCol = 'date';
+        let sortDesc = true; // Default to descending (Newest first)
+
         function showSection(section) {
             document.getElementById('view-discover').classList.toggle('hidden', section !== 'discover');
             document.getElementById('view-profiles').classList.toggle('hidden', section !== 'profiles');
@@ -239,7 +243,6 @@
         function togglePanel(open) { document.getElementById('profile-panel').style.transform = open ? "translateX(0)" : "translateX(100%)"; }
         function safeStr(val) { return (!val || String(val).toLowerCase() === 'null' || String(val).toLowerCase() === 'undefined') ? "" : String(val).trim(); }
 
-        // UPDATED: Now extracts the primary Published Date from the OCDS release
         function getNoticeData(r) {
             const amount = r.tender?.value?.amount || r.awards?.[0]?.value?.amount || 0;
             const startDate = r.tender?.contractPeriod?.startDate || r.awards?.[0]?.contractPeriod?.startDate || "";
@@ -333,7 +336,7 @@
                 });
                 const data = await res.json();
                 backendResults = data.releases || [];
-            } catch (err) { return; }
+            } catch (err) { console.error("Preview failed: ", err); return; }
 
             const finalFiltered = backendResults.filter(r => {
                 const { amount, endDate } = getNoticeData(r);
@@ -406,6 +409,17 @@
             renderTable(finalFiltered, true);
         }
 
+        // NEW SORTING FUNCTIONALITY
+        function sortTable(col) {
+            if (sortCol === col) {
+                sortDesc = !sortDesc;
+            } else {
+                sortCol = col;
+                sortDesc = true;
+            }
+            renderTable(currentFilteredResults, true);
+        }
+
         function changePage(direction) {
             currentPage += direction;
             renderTable(currentFilteredResults, false);
@@ -413,6 +427,20 @@
         }
 
         function renderTable(data, resetPage = true) {
+            // Apply sorting to the dataset before slicing for pagination
+            data.sort((a, b) => {
+                if (sortCol === 'date') {
+                    const d1 = a.date ? new Date(a.date).getTime() : 0;
+                    const d2 = b.date ? new Date(b.date).getTime() : 0;
+                    return sortDesc ? d2 - d1 : d1 - d2;
+                } else if (sortCol === 'value') {
+                    const v1 = getNoticeData(a).amount || 0;
+                    const v2 = getNoticeData(b).amount || 0;
+                    return sortDesc ? v2 - v1 : v1 - v2;
+                }
+                return 0;
+            });
+
             if (resetPage) currentPage = 1;
             currentFilteredResults = data;
             const tbody = document.getElementById('table-body');
@@ -423,7 +451,6 @@
             document.getElementById('total-value-sum').innerText = "£" + Math.round(totalVal).toLocaleString();
             
             if(total === 0) { 
-                // Adjusted colspan for the new Published column
                 tbody.innerHTML = `<tr><td colspan="7" class="py-20 text-center text-zinc-400 uppercase font-bold tracking-widest bg-white">No matching records found.</td></tr>`; 
                 document.getElementById('page-start').innerText = 0;
                 document.getElementById('page-end').innerText = 0;
@@ -461,9 +488,7 @@
                     else statusTag = `<div class="text-xs text-zinc-950 font-medium"><i class="fa-solid fa-circle text-emerald-600 text-[8px] mr-1.5"></i> Open <span class="text-zinc-500 block text-[10px] mt-0.5 ml-3">${dateStr}</span></div>`;
                 }
 
-                // NEW: Published Date Formatting
                 const pubDateStr = publishDate ? new Date(publishDate).toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: '2-digit'}) : '<span class="italic text-zinc-300">--</span>';
-                
                 const cStart = startDate ? new Date(startDate).toLocaleDateString('en-GB', {month: 'short', year: '2-digit'}) : '';
                 const cEnd = endDate ? new Date(endDate).toLocaleDateString('en-GB', {month: 'short', year: '2-digit'}) : '';
                 const contractDates = (startDate || endDate) ? `<div class="text-xs text-zinc-700 whitespace-nowrap">${cStart || '--'} &rarr;<br>${cEnd || '--'}</div>` : `<span class="text-zinc-400 text-[10px] italic uppercase tracking-widest">Unspecified</span>`;
@@ -499,7 +524,6 @@
         function removeTag(containerId, index) { if(containerId === 'include-tags') { includeTags.splice(index, 1); renderTags(containerId, includeTags); } else { excludeTags.splice(index, 1); renderTags(containerId, excludeTags); } }
         async function fetchTenders() { const res = await fetch('/api/live-data'); const data = await res.json(); allReleases = data.releases || []; renderTable(allReleases, true); }
         
-        // UPDATED: CSV Export to include the Published Date
         function exportToCSV() {
             const rows = [["Opportunity", "Published Date", "Notice Type", "Buyer", "Value", "Start Date", "End Date", "Description"]];
             currentFilteredResults.forEach(r => {
