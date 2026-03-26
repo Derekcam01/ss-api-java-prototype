@@ -9,23 +9,15 @@
     
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'elcom-blue': '#006A8D',
-                        'elcom-orange': '#E07C16',
-                        'elcom-main-bg': '#F4F4F5'
-                    }
-                }
-            }
+            theme: { extend: { colors: { 'elcom-blue': '#006A8D', 'elcom-orange': '#E07C16', 'elcom-main-bg': '#F4F4F5' } } }
         }
     </script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600&display=swap');
         .logo-font { font-family: 'Space Grotesk', sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
     </style>
 </head>
 <body class="bg-elcom-main-bg text-zinc-900 h-full flex overflow-hidden font-[Inter] text-left">
@@ -44,7 +36,7 @@
                     <h3 class="text-zinc-950 text-[10px] font-bold uppercase tracking-widest opacity-60">Description</h3>
                     <p id="modal-desc" class="text-zinc-700 text-sm whitespace-pre-wrap leading-relaxed break-words">...</p>
                 </div>
-                <div class="bg-zinc-50 rounded-2xl p-6 border border-zinc-100 h-fit space-y-6 shadow-inner">
+                <div class="bg-zinc-50 rounded-2xl p-6 border border-zinc-100 h-fit space-y-6 shadow-inner flex flex-col">
                     <div>
                         <h4 class="text-[10px] font-bold text-zinc-500 uppercase mb-2">Buyer</h4>
                         <div id="modal-buyer" class="text-zinc-950 font-bold text-sm break-words">---</div>
@@ -55,8 +47,17 @@
                             <div id="modal-contact-phone" class="text-[11px] text-zinc-600 hidden flex items-center gap-1.5"><i class="fa-solid fa-phone opacity-70 shrink-0"></i> <span></span></div>
                         </div>
                     </div>
+                    
                     <hr class="border-zinc-100">
                     <div><h4 class="text-[10px] font-bold text-zinc-500 uppercase mb-2">CPV Classification</h4><div class="text-elcom-blue font-mono text-xs leading-relaxed break-words" id="modal-cpv">---</div></div>
+                    
+                    <hr class="border-zinc-100">
+                    <div>
+                        <h4 class="text-[10px] font-bold text-zinc-500 uppercase mb-2">Attached Documents</h4>
+                        <div id="modal-documents" class="flex flex-col gap-2">
+                            </div>
+                    </div>
+
                     <hr class="border-zinc-100">
                     <div class="grid grid-cols-1 gap-4">
                         <div><h4 class="text-[10px] font-bold text-zinc-500 uppercase mb-1">Est. Start Date</h4><div id="modal-start" class="text-emerald-600 font-mono text-sm font-semibold">---</div></div>
@@ -64,7 +65,12 @@
                     </div>
                     <hr class="border-zinc-100">
                     <div><h4 class="text-[10px] font-bold text-zinc-500 uppercase mb-1">Value</h4><div id="modal-value" class="text-zinc-950 font-black text-2xl tracking-tight">£0</div></div>
-                    <a id="modal-link" href="#" target="_blank" class="block text-center py-3.5 bg-elcom-orange text-white rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all hover:brightness-110 shadow-md">View Government Notice</a>
+                    
+                    <div class="flex gap-2 mt-auto pt-2">
+                        <button onclick="trackCurrentModalNotice()" class="flex-1 py-3.5 bg-zinc-200 text-zinc-900 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all hover:bg-zinc-300 shadow-sm border border-zinc-300 whitespace-nowrap"><i class="fa-solid fa-thumbtack text-amber-600 mr-1.5"></i> Track</button>
+                        <a id="modal-portal-link" href="#" target="_blank" class="hidden flex-1 text-center py-3.5 bg-emerald-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all hover:bg-emerald-500 shadow-sm whitespace-nowrap px-1">Portal</a>
+                        <a id="modal-link" href="#" target="_blank" class="flex-1 text-center py-3.5 bg-elcom-orange text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all hover:brightness-110 shadow-sm whitespace-nowrap px-1">FTS Notice</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -78,15 +84,31 @@
         <div class="p-8 space-y-6 overflow-y-auto flex-1 custom-scrollbar bg-white">
             <input type="hidden" id="profile-id">
             <div><label class="text-[10px] font-bold text-elcom-blue uppercase block mb-2">Profile Name (Optional)</label><input id="profile-name" placeholder="e.g. IT Hardware Q3" class="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-950 focus:border-elcom-blue focus:ring-1 focus:ring-elcom-blue outline-none transition-all placeholder:text-zinc-300"></div>
-            <div>
-                <label class="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">Notice Stage</label>
-                <select id="notice-type-input" class="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm outline-none text-zinc-950 focus:border-elcom-blue focus:ring-1 focus:ring-elcom-blue">
-                    <option value="">All Stages</option>
-                    <option value="planning">Early Engagement (Planning / PINs)</option>
-                    <option value="tender">Tenders (Live Opportunities)</option>
-                    <option value="award">Awards (Past Winners / Expiring)</option>
-                </select>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">Notice Stage</label>
+                    <select id="notice-type-input" class="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm outline-none text-zinc-950 focus:border-elcom-blue focus:ring-1 focus:ring-elcom-blue">
+                        <option value="">All Stages</option>
+                        <option value="planning">Early Engagement (PINs)</option>
+                        <option value="tender">Tenders (Live)</option>
+                        <option value="award">Awards (Past)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">Region</label>
+                    <select id="region-input" onchange="addRegion(this.value)" class="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm outline-none text-zinc-950 focus:border-elcom-blue focus:ring-1 focus:ring-elcom-blue">
+                        <option value="">Add Region...</option>
+                        <option value="UK Wide">UK Wide</option>
+                        <option value="England">England</option>
+                        <option value="Scotland">Scotland</option>
+                        <option value="Wales">Wales</option>
+                        <option value="Northern Ireland">Northern Ireland</option>
+                    </select>
+                </div>
             </div>
+            
+            <div id="region-tags" class="flex flex-wrap gap-2 -mt-4"></div>
             
             <div class="grid grid-cols-2 gap-4 bg-elcom-main-bg p-4 rounded-xl border border-zinc-200">
                 <div class="col-span-2"><span class="text-[10px] font-bold text-elcom-orange uppercase block"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Contract Expiry Hunt</span></div>
@@ -122,7 +144,7 @@
         </div>
     </div>
 
-    <div class="w-68 bg-elcom-blue flex flex-col p-6 z-10 shadow-2xl">
+    <div class="w-68 bg-elcom-blue flex flex-col p-6 z-10 shadow-2xl shrink-0">
         <div class="mb-10 block space-y-1">
             <div class="logo-font text-3xl font-black text-white leading-none">Elcom</div>
             <div class="logo-font text-lg font-bold tracking-tight text-white/90">
@@ -130,9 +152,10 @@
             </div>
         </div>
         <nav class="space-y-4">
-            <button onclick="showSection('discover')" id="nav-discover" class="w-full flex items-center gap-x-4 px-5 py-4 rounded-2xl bg-white/10 text-white font-bold transition-all shadow-inner"><i class="fa-solid fa-compass"></i><span>DISCOVER</span></button>
-            <button onclick="showSection('profiles')" id="nav-profiles" class="w-full flex items-center gap-x-4 px-5 py-4 rounded-2xl text-white/70 hover:bg-white/5 transition-all"><i class="fa-solid fa-bolt"></i><span>MY PROFILES</span></button>
-            <button onclick="showSection('early')" id="nav-early" class="w-full flex items-center gap-x-4 px-5 py-4 rounded-2xl text-white/70 hover:bg-white/5 transition-all mt-4 border border-white/10"><i class="fa-solid fa-handshake"></i><span class="text-sm">EARLY ENGAGEMENT</span></button>
+            <button onclick="showSection('discover')" id="nav-discover" class="w-full flex items-center gap-x-4 px-5 py-4 rounded-2xl bg-white/10 text-white font-bold transition-all shadow-inner"><i class="fa-solid fa-compass w-5 text-center"></i><span>DISCOVER</span></button>
+            <button onclick="showSection('profiles')" id="nav-profiles" class="w-full flex items-center gap-x-4 px-5 py-4 rounded-2xl text-white/70 hover:bg-white/5 transition-all"><i class="fa-solid fa-bolt w-5 text-center"></i><span>MY PROFILES</span></button>
+            <button onclick="showSection('early')" id="nav-early" class="w-full flex items-center gap-x-4 px-5 py-4 rounded-2xl text-white/70 hover:bg-white/5 transition-all mt-4 border border-white/10"><i class="fa-solid fa-handshake w-5 text-center"></i><span class="text-sm">EARLY ENGAGEMENT</span></button>
+            <button onclick="showSection('tracked')" id="nav-tracked" class="w-full flex items-center gap-x-4 px-5 py-4 rounded-2xl text-amber-500/80 hover:bg-amber-500/10 transition-all border border-amber-500/20"><i class="fa-solid fa-thumbtack w-5 text-center"></i><span class="text-sm font-bold">TRACKED PIPELINE</span></button>
         </nav>
     </div>
 
@@ -149,6 +172,7 @@
         </header>
 
         <main class="flex-1 overflow-auto p-8 bg-elcom-main-bg flex flex-col">
+            
             <div id="view-discover" class="flex-1 flex flex-col">
                 <div id="active-filter-banner" class="hidden bg-white border border-zinc-200 rounded-2xl p-6 mb-8 flex justify-between items-center shadow-lg shrink-0">
                     <div class="flex items-center gap-8">
@@ -157,7 +181,7 @@
                         <div><span class="text-zinc-600 text-[10px] font-bold uppercase mb-1 block">Visible Pipeline Value</span><div class="text-elcom-blue font-mono text-2xl font-bold" id="total-value-sum">£0</div></div>
                     </div>
                     <div class="flex gap-3">
-                        <button onclick="exportToCSV()" class="px-5 py-2.5 bg-zinc-100 text-zinc-900 rounded-xl text-xs font-bold transition-all hover:bg-zinc-200 border border-zinc-200">Export CSV</button>
+                        <button onclick="exportToCSV()" class="px-5 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold transition-all hover:bg-emerald-100 border border-emerald-200 shadow-sm"><i class="fa-solid fa-download mr-1.5"></i> Export for CRM</button>
                         <button onclick="clearFilter()" class="px-5 py-2.5 bg-white text-zinc-900 rounded-xl text-xs font-bold border border-zinc-200 hover:bg-zinc-50"><i class="fa-solid fa-xmark text-red-500 mr-2"></i>Clear</button>
                     </div>
                 </div>
@@ -168,6 +192,7 @@
                             <thead class="sticky top-0 bg-zinc-50 z-10">
                                 <tr class="text-zinc-600 border-b border-zinc-200 uppercase text-[10px] tracking-widest">
                                     <th class="py-4 px-6 w-1/3">Opportunity</th>
+                                    <th class="py-4 px-6 cursor-pointer hover:text-elcom-blue transition-colors group select-none" onclick="sortTable('score')">Rank <i class="fa-solid fa-sort ml-1 opacity-50 group-hover:opacity-100"></i></th>
                                     <th class="py-4 px-6 cursor-pointer hover:text-elcom-blue transition-colors group select-none" onclick="sortTable('date')">Published <i class="fa-solid fa-sort ml-1 opacity-50 group-hover:opacity-100"></i></th>
                                     <th class="py-4 px-6">Type</th>
                                     <th class="py-4 px-6">Deadline</th>
@@ -179,14 +204,11 @@
                             <tbody id="table-body" class="divide-y divide-zinc-100"></tbody>
                         </table>
                     </div>
-                    
                     <div id="pagination-controls" class="bg-zinc-50 border-t border-zinc-200 px-6 py-4 flex items-center justify-between shrink-0">
-                        <div class="text-xs text-zinc-500 font-medium">
-                            Showing <span id="page-start" class="font-bold text-zinc-900">0</span> to <span id="page-end" class="font-bold text-zinc-900">0</span> of <span id="page-total" class="font-bold text-elcom-blue">0</span> entries
-                        </div>
+                        <div class="text-xs text-zinc-500 font-medium">Showing <span id="page-start" class="font-bold text-zinc-900">0</span> to <span id="page-end" class="font-bold text-zinc-900">0</span> of <span id="page-total" class="font-bold text-elcom-blue">0</span> entries</div>
                         <div class="flex gap-2">
-                            <button onclick="changePage(-1)" id="btn-prev" class="px-4 py-2 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"><i class="fa-solid fa-chevron-left mr-1"></i> Prev</button>
-                            <button onclick="changePage(1)" id="btn-next" class="px-4 py-2 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm">Next <i class="fa-solid fa-chevron-right ml-1"></i></button>
+                            <button onclick="changePage(-1)" id="btn-prev" class="px-4 py-2 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 transition-all shadow-sm"><i class="fa-solid fa-chevron-left mr-1"></i> Prev</button>
+                            <button onclick="changePage(1)" id="btn-next" class="px-4 py-2 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 transition-all shadow-sm">Next <i class="fa-solid fa-chevron-right ml-1"></i></button>
                         </div>
                     </div>
                 </div>
@@ -202,42 +224,72 @@
                 <p class="text-sm text-zinc-500 mb-6 -mt-4">Profiles searching for expiring contracts to target pre-tender engagement.</p>
                 <div id="early-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
+
+            <div id="view-tracked" class="hidden flex-1 flex flex-col">
+                <div class="bg-white border border-amber-200 rounded-2xl p-6 mb-8 flex justify-between items-center shadow-lg shrink-0 border-l-4 border-l-amber-500">
+                    <div class="flex items-center gap-8">
+                        <div><span class="text-amber-600 text-[10px] font-bold uppercase mb-1 block">Sales CRM</span><div class="text-zinc-950 font-black text-2xl tracking-tighter">Tracked Pipeline</div></div>
+                    </div>
+                    <button onclick="exportTrackedToCSV()" class="px-5 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold transition-all hover:bg-emerald-100 border border-emerald-200 shadow-sm"><i class="fa-solid fa-download mr-1.5"></i> Export Pipeline to CRM</button>
+                </div>
+                
+                <div class="bg-white border border-zinc-200 rounded-2xl shadow-sm flex-1 flex flex-col overflow-hidden">
+                    <div class="overflow-auto flex-1">
+                        <table class="w-full text-sm text-left">
+                            <thead class="sticky top-0 bg-zinc-50 z-10">
+                                <tr class="text-zinc-600 border-b border-zinc-200 uppercase text-[10px] tracking-widest">
+                                    <th class="py-4 px-6 w-1/4">Tracked Opportunity</th>
+                                    <th class="py-4 px-6">Buyer & Contact</th>
+                                    <th class="py-4 px-6">Value / Dates</th>
+                                    <th class="py-4 px-6 w-1/3">Sales Notes</th>
+                                    <th class="py-4 px-6 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tracked-table-body" class="divide-y divide-zinc-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
     <script>
         let allReleases = [];
         let allProfilesData = [];
+        let trackedNoticesData = [];
         let includeTags = [];
         let excludeTags = [];
         let cpvTags = [];
+        let regionTags = []; 
         let currentFilteredResults = [];
         let currentPage = 1;
         const rowsPerPage = 25; 
         let searchTimeout; 
-
-        // SORTING STATE
         let sortCol = 'date';
-        let sortDesc = true; // Default to descending (Newest first)
+        let sortDesc = true; 
+        let currentModalOcid = null; 
 
         function showSection(section) {
             document.getElementById('view-discover').classList.toggle('hidden', section !== 'discover');
             document.getElementById('view-profiles').classList.toggle('hidden', section !== 'profiles');
             document.getElementById('view-early').classList.toggle('hidden', section !== 'early');
+            document.getElementById('view-tracked').classList.toggle('hidden', section !== 'tracked');
 
-            const tabs = ['discover', 'profiles', 'early'];
+            const tabs = ['discover', 'profiles', 'early', 'tracked'];
             tabs.forEach(t => {
                 const btn = document.getElementById('nav-' + t);
                 if(section === t) {
-                    btn.classList.add('bg-white/10', 'text-white');
-                    btn.classList.remove('text-white/70');
+                    if(t === 'tracked') { btn.classList.add('bg-amber-500/20', 'text-amber-600'); btn.classList.remove('text-amber-500/80'); }
+                    else { btn.classList.add('bg-white/10', 'text-white'); btn.classList.remove('text-white/70'); }
                 } else {
-                    btn.classList.remove('bg-white/10', 'text-white');
-                    btn.classList.add('text-white/70');
+                    if(t === 'tracked') { btn.classList.remove('bg-amber-500/20', 'text-amber-600'); btn.classList.add('text-amber-500/80'); }
+                    else { btn.classList.remove('bg-white/10', 'text-white'); btn.classList.add('text-white/70'); }
                 }
             });
 
             if(section === 'profiles' || section === 'early') loadProfiles();
+            if(section === 'tracked') loadTrackedNotices();
         }
 
         function togglePanel(open) { document.getElementById('profile-panel').style.transform = open ? "translateX(0)" : "translateX(100%)"; }
@@ -257,11 +309,53 @@
             return { amount, startDate, endDate, publishDate, cpvId, cpvDesc };
         }
 
+        function getPortalLink(r) {
+            if (r.tender?.communication?.url) return r.tender.communication.url;
+            if (r.tender?.documents && r.tender.documents.length > 0) {
+                const docWithUrl = r.tender.documents.find(d => d.url);
+                if (docWithUrl) return docWithUrl.url;
+            }
+            const desc = r.tender?.description || "";
+            const urlMatch = desc.match(/https?:\/\/[^\s"'<>()]+/i);
+            if (urlMatch) return urlMatch[0];
+            return null;
+        }
+
+        function calculateScore(item, keywords) {
+            if (!keywords || keywords.length === 0) return 0;
+            let score = 0;
+            
+            const title = (item.tender?.title || "").toLowerCase();
+            const desc = (item.tender?.description || "").toLowerCase();
+            const buyerNames = (item.parties || []).map(p => p.name || "").join(" ").toLowerCase();
+
+            keywords.forEach(word => {
+                if(!word.trim()) return;
+                const escaped = word.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                const regex = new RegExp(`\\b${escaped}\\b`, 'gi');
+                
+                const titleMatches = title.match(regex);
+                if (titleMatches) score += (titleMatches.length * 5); 
+                
+                const descMatches = desc.match(regex);
+                if (descMatches) score += (descMatches.length * 1); 
+                
+                const buyerMatches = buyerNames.match(regex);
+                if (buyerMatches) score += (buyerMatches.length * 2); 
+            });
+            return score;
+        }
+
         function getSearchMatches(item, incTags, excTags, cpvTags, stage) {
             const title = (item.tender?.title || "").toLowerCase();
             const desc = (item.tender?.description || "").toLowerCase();
-            const partiesStr = JSON.stringify(item.parties || []).toLowerCase(); 
-            const fullText = `${title} ${desc} ${partiesStr}`;
+            const buyerNames = (item.parties || []).map(p => p.name || "").join(" ").toLowerCase(); 
+            let fullText = `${title} ${desc} ${buyerNames}`;
+
+            fullText = fullText.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi, ' ');
+            fullText = fullText.replace(/https?:\/\/[^\s]+/gi, ' ');
+            fullText = fullText.replace(/www\.[^\s]+/gi, ' ');
+            fullText = fullText.replace(/\b[a-z0-9-]+\.[a-z0-9-]+\.[a-z]{2,}\b/gi, ' ');
 
             const containsExactWord = (text, word) => {
                 const escaped = word.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -299,10 +393,20 @@
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(async () => {
                 const term = val.trim();
-                if (!term) { renderTable(allReleases, true); return; }
+                if (!term) { 
+                    sortCol = 'date'; 
+                    renderTable(allReleases, true); 
+                    return; 
+                }
                 try {
                     const res = await fetch('/api/vault-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: term }) });
                     const data = await res.json();
+                    
+                    const words = term.split(/\s+/);
+                    (data.releases || []).forEach(r => r._score = calculateScore(r, words));
+                    sortCol = 'score';
+                    sortDesc = true;
+                    
                     renderTable(data.releases || [], true);
                 } catch (err) {}
             }, 300);
@@ -310,7 +414,6 @@
 
         async function runPreviewSearch() {
             const getVal = (id) => document.getElementById(id).value.trim();
-            
             const rawInc = getVal('keyword-input');
             let tempIncludeTags = [...includeTags];
             if (rawInc) tempIncludeTags.push(rawInc);
@@ -331,12 +434,10 @@
 
             let backendResults = [];
             try {
-                const res = await fetch('/api/vault-search', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: keywordStr })
-                });
+                const res = await fetch('/api/vault-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: keywordStr }) });
                 const data = await res.json();
                 backendResults = data.releases || [];
-            } catch (err) { console.error("Preview failed: ", err); return; }
+            } catch (err) { return; }
 
             const finalFiltered = backendResults.filter(r => {
                 const { amount, endDate } = getNoticeData(r);
@@ -354,17 +455,20 @@
                 return matchBudget && matchContent && matchDate;
             });
 
+            finalFiltered.forEach(r => r._score = calculateScore(r, tempIncludeTags));
+            sortCol = 'score';
+            sortDesc = true;
+
             showSection('discover');
             document.getElementById('active-filter-banner').classList.remove('hidden');
             document.getElementById('active-filter-type').innerText = "Active Advanced Search";
             document.getElementById('active-filter-name').innerText = getVal('profile-name') || "Unsaved Preview Query";
-            
             renderTable(finalFiltered, true);
             togglePanel(false);
         }
 
         async function activateFilterById(id) {
-            const p = allProfilesData.find(x => x.id === id);
+            const p = allProfilesData.find(x => x.id == id);
             if (!p) return;
             showSection('discover');
             document.getElementById('active-filter-banner').classList.remove('hidden');
@@ -395,7 +499,6 @@
                 const { amount, endDate } = getNoticeData(r);
                 const matchBudget = (amount >= minV && amount <= maxV);
                 const matchContent = getSearchMatches(r, inc, exc, cpvArr, stage);
-                
                 let matchDate = true;
                 if (expFrom || expTo) {
                     if (!endDate) { matchDate = false; } else {
@@ -406,17 +509,16 @@
                 }
                 return matchBudget && matchContent && matchDate;
             });
+            
+            finalFiltered.forEach(r => r._score = calculateScore(r, inc));
+            sortCol = 'score';
+            sortDesc = true;
+            
             renderTable(finalFiltered, true);
         }
 
-        // NEW SORTING FUNCTIONALITY
         function sortTable(col) {
-            if (sortCol === col) {
-                sortDesc = !sortDesc;
-            } else {
-                sortCol = col;
-                sortDesc = true;
-            }
+            if (sortCol === col) { sortDesc = !sortDesc; } else { sortCol = col; sortDesc = true; }
             renderTable(currentFilteredResults, true);
         }
 
@@ -427,7 +529,6 @@
         }
 
         function renderTable(data, resetPage = true) {
-            // Apply sorting to the dataset before slicing for pagination
             data.sort((a, b) => {
                 if (sortCol === 'date') {
                     const d1 = a.date ? new Date(a.date).getTime() : 0;
@@ -437,6 +538,10 @@
                     const v1 = getNoticeData(a).amount || 0;
                     const v2 = getNoticeData(b).amount || 0;
                     return sortDesc ? v2 - v1 : v1 - v2;
+                } else if (sortCol === 'score') {
+                    const s1 = a._score || 0;
+                    const s2 = b._score || 0;
+                    return sortDesc ? s2 - s1 : s1 - s2;
                 }
                 return 0;
             });
@@ -451,7 +556,7 @@
             document.getElementById('total-value-sum').innerText = "£" + Math.round(totalVal).toLocaleString();
             
             if(total === 0) { 
-                tbody.innerHTML = `<tr><td colspan="7" class="py-20 text-center text-zinc-400 uppercase font-bold tracking-widest bg-white">No matching records found.</td></tr>`; 
+                tbody.innerHTML = `<tr><td colspan="8" class="py-20 text-center text-zinc-400 uppercase font-bold tracking-widest bg-white">No matching records found.</td></tr>`; 
                 document.getElementById('page-start').innerText = 0;
                 document.getElementById('page-end').innerText = 0;
                 document.getElementById('page-total').innerText = 0;
@@ -494,9 +599,14 @@
                 const contractDates = (startDate || endDate) ? `<div class="text-xs text-zinc-700 whitespace-nowrap">${cStart || '--'} &rarr;<br>${cEnd || '--'}</div>` : `<span class="text-zinc-400 text-[10px] italic uppercase tracking-widest">Unspecified</span>`;
                 const displayValue = amount > 0 ? `£${amount.toLocaleString()}` : `<span class="text-zinc-400 text-[10px] italic uppercase tracking-widest">Not Disclosed</span>`;
 
+                const scoreBadge = (r._score !== undefined && r._score > 0) 
+                    ? `<div class="inline-flex items-center justify-center bg-zinc-100 px-2 py-1 rounded text-xs font-black text-zinc-700 border border-zinc-200 shadow-sm min-w-[32px]"><i class="fa-solid fa-fire text-orange-500 mr-1.5"></i>${r._score}</div>` 
+                    : '<span class="text-zinc-300 font-mono">-</span>';
+
                 return `
                     <tr class="hover:bg-zinc-50 transition-colors group cursor-pointer border-b border-zinc-100 bg-white" onclick='openModalById("${r.ocid}")'>
                         <td class="py-4 px-6 font-semibold text-elcom-blue group-hover:underline leading-snug pr-6">${title}...</td>
+                        <td class="py-4 px-6">${scoreBadge}</td>
                         <td class="py-4 px-6 text-zinc-600 text-xs font-medium whitespace-nowrap">${pubDateStr}</td>
                         <td class="py-4 px-6">${typeBadge}</td>
                         <td class="py-4 px-6">${statusTag}</td>
@@ -513,36 +623,59 @@
             document.getElementById('btn-next').disabled = currentPage >= totalPages;
         }
 
-        document.getElementById('keyword-input').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.value.trim()) { includeTags.push(e.target.value.trim()); e.target.value = ''; renderTags('include-tags', includeTags); } });
-        document.getElementById('exclude-input').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.value.trim()) { excludeTags.push(e.target.value.trim()); e.target.value = ''; renderTags('exclude-tags', excludeTags); } });
-
-        function renderTags(containerId, list) {
-            const isExclude = containerId === 'exclude-tags';
-            const bgClass = isExclude ? 'bg-red-50 border-red-200 text-red-700' : 'bg-elcom-blue/5 border-elcom-blue/20 text-elcom-blue';
-            document.getElementById(containerId).innerHTML = list.map((tag, i) => `<span class="px-3 py-1.5 ${bgClass} border rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm">${tag}<i class="fa-solid fa-xmark cursor-pointer" onclick="removeTag('${containerId}', ${i})"></i></span>`).join('');
+        async function fetchTenders() { 
+            const res = await fetch('/api/live-data'); 
+            const data = await res.json(); 
+            allReleases = data.releases || []; 
+            sortCol = 'date'; 
+            sortDesc = true;
+            renderTable(allReleases, true); 
         }
-        function removeTag(containerId, index) { if(containerId === 'include-tags') { includeTags.splice(index, 1); renderTags(containerId, includeTags); } else { excludeTags.splice(index, 1); renderTags(containerId, excludeTags); } }
-        async function fetchTenders() { const res = await fetch('/api/live-data'); const data = await res.json(); allReleases = data.releases || []; renderTable(allReleases, true); }
         
+        function getCRMContactData(r) {
+            const buyerParty = r.parties?.find(p => p.roles?.includes('buyer'));
+            return {
+                buyerName: buyerParty?.name || "UK Gov Agency",
+                cName: buyerParty?.contactPoint?.name || "",
+                cEmail: buyerParty?.contactPoint?.email || "",
+                cPhone: buyerParty?.contactPoint?.telephone || ""
+            };
+        }
+
         function exportToCSV() {
-            const rows = [["Opportunity", "Published Date", "Notice Type", "Buyer", "Value", "Start Date", "End Date", "Description"]];
+            const rows = [["Opportunity", "Published", "Notice Type", "Buyer", "Contact Name", "Contact Email", "Contact Phone", "Value", "Start Date", "End Date", "Description"]];
             currentFilteredResults.forEach(r => {
                 const { amount, startDate, endDate, publishDate } = getNoticeData(r);
-                rows.push([ `"${r.tender?.title || ''}"`, `"${publishDate}"`, `"${(r.tag || []).join(', ')}"`, `"${r.parties?.find(p => p.roles?.includes('buyer'))?.name || ''}"`, amount, `"${startDate}"`, `"${endDate}"`, `"${(r.tender?.description || '').replace(/"/g, '""')}"` ]);
+                const { buyerName, cName, cEmail, cPhone } = getCRMContactData(r);
+                rows.push([ `"${r.tender?.title || ''}"`, `"${publishDate}"`, `"${(r.tag || []).join(', ')}"`, `"${buyerName}"`, `"${cName}"`, `"${cEmail}"`, `"${cPhone}"`, amount, `"${startDate}"`, `"${endDate}"`, `"${(r.tender?.description || '').replace(/"/g, '""')}"` ]);
             });
             let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
-            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", "MultiQuote_Export.csv"); link.click();
+            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", "Intelligence_Export.csv"); link.click();
         }
 
+        function exportTrackedToCSV() {
+            const rows = [["Opportunity", "Published", "Notice Type", "Buyer", "Contact Name", "Contact Email", "Contact Phone", "Value", "Start Date", "End Date", "Sales Notes"]];
+            trackedNoticesData.forEach(t => {
+                try {
+                    const r = JSON.parse(t.raw_json);
+                    const { amount, startDate, endDate, publishDate } = getNoticeData(r);
+                    const { buyerName, cName, cEmail, cPhone } = getCRMContactData(r);
+                    rows.push([ `"${r.tender?.title || ''}"`, `"${publishDate}"`, `"${(r.tag || []).join(', ')}"`, `"${buyerName}"`, `"${cName}"`, `"${cEmail}"`, `"${cPhone}"`, amount, `"${startDate}"`, `"${endDate}"`, `"${(t.notes || '').replace(/"/g, '""')}"` ]);
+                } catch(e) {}
+            });
+            let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", "CRM_Pipeline_Export.csv"); link.click();
+        }
+
+        // ==================================================
+        // NEW: DOCUMENTS EXTRACTION & RENDERING IN MODAL
+        // ==================================================
         function openModalById(ocid) {
+            currentModalOcid = ocid; 
             let r = currentFilteredResults.find(x => x.ocid === ocid) || allReleases.find(x => x.ocid === ocid);
             if(!r) return;
             const { amount, startDate, endDate, cpvId, cpvDesc } = getNoticeData(r);
-            const buyerParty = r.parties?.find(p => p.roles?.includes('buyer'));
-            const buyerName = buyerParty?.name || "UK Gov Agency";
-            const contactName = buyerParty?.contactPoint?.name || "";
-            const contactEmail = buyerParty?.contactPoint?.email || "";
-            const contactPhone = buyerParty?.contactPoint?.telephone || "";
+            const { buyerName, cName, cEmail, cPhone } = getCRMContactData(r);
 
             document.getElementById('modal-ref').innerText = r.tender?.id || "N/A";
             document.getElementById('modal-title').innerText = r.tender?.title || "Contract Detail";
@@ -554,22 +687,117 @@
             document.getElementById('modal-value').innerText = "£" + amount.toLocaleString();
             document.getElementById('modal-link').href = "https://www.find-tender.service.gov.uk/Notice/" + (r.tender?.id || "");
             
+            // Render the Portal Link if available
+            const portalUrl = getPortalLink(r);
+            const portalBtn = document.getElementById('modal-portal-link');
+            if (portalUrl) {
+                portalBtn.href = portalUrl;
+                portalBtn.classList.remove('hidden');
+            } else {
+                portalBtn.classList.add('hidden');
+            }
+
+            // Extract and Render Attached Documents
+            const docsContainer = document.getElementById('modal-documents');
+            const docs = r.tender?.documents || [];
+            
+            if (docs.length > 0) {
+                const docLinks = docs.map(d => {
+                    if(!d.url) return '';
+                    const title = d.title || d.documentType || "Unnamed Document";
+                    return `<a href="${d.url}" target="_blank" class="text-[11px] font-medium text-elcom-blue hover:underline flex items-center gap-1.5 break-all p-1.5 rounded hover:bg-elcom-blue/5 transition-colors border border-transparent hover:border-elcom-blue/10"><i class="fa-solid fa-file-pdf opacity-70 shrink-0 text-red-500"></i> <span class="truncate">${title}</span></a>`;
+                }).join('');
+                
+                docsContainer.innerHTML = docLinks !== '' ? docLinks : '<span class="text-zinc-400 text-[10px] italic uppercase tracking-widest">No public documents provided</span>';
+            } else {
+                docsContainer.innerHTML = '<span class="text-zinc-400 text-[10px] italic uppercase tracking-widest">No public documents provided</span>';
+            }
+            
             const wrapperDiv = document.getElementById('modal-contact-wrapper');
             const nameDiv = document.getElementById('modal-contact-name');
             const emailLink = document.getElementById('modal-contact-email');
             const phoneDiv = document.getElementById('modal-contact-phone');
             
-            if (contactName || contactEmail || contactPhone) {
+            if (cName || cEmail || cPhone) {
                 wrapperDiv.classList.remove('hidden');
-                if (contactName) { nameDiv.innerText = contactName; nameDiv.classList.remove('hidden'); } else { nameDiv.classList.add('hidden'); }
-                if (contactEmail) { emailLink.href = `mailto:${contactEmail}`; emailLink.querySelector('span').innerText = contactEmail; emailLink.classList.remove('hidden'); } else { emailLink.classList.add('hidden'); }
-                if (contactPhone) { phoneDiv.querySelector('span').innerText = contactPhone; phoneDiv.classList.remove('hidden'); } else { phoneDiv.classList.add('hidden'); }
+                if (cName) { nameDiv.innerText = cName; nameDiv.classList.remove('hidden'); } else { nameDiv.classList.add('hidden'); }
+                if (cEmail) { emailLink.href = `mailto:${cEmail}`; emailLink.querySelector('span').innerText = cEmail; emailLink.classList.remove('hidden'); } else { emailLink.classList.add('hidden'); }
+                if (cPhone) { phoneDiv.querySelector('span').innerText = cPhone; phoneDiv.classList.remove('hidden'); } else { phoneDiv.classList.add('hidden'); }
             } else { wrapperDiv.classList.add('hidden'); }
 
             document.getElementById('details-modal').classList.remove('hidden'); document.getElementById('details-modal').classList.add('flex');
         }
 
-        function closeModal() { document.getElementById('details-modal').classList.add('hidden'); }
+        function closeModal() { document.getElementById('details-modal').classList.add('hidden'); currentModalOcid = null; }
+
+        async function trackCurrentModalNotice() {
+            if(!currentModalOcid) return;
+            let r = currentFilteredResults.find(x => x.ocid === currentModalOcid) || allReleases.find(x => x.ocid === currentModalOcid);
+            if(!r) return;
+
+            await fetch('/api/tracked/save', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ ocid: r.ocid, notes: "", raw_json: JSON.stringify(r) })
+            });
+            
+            closeModal();
+            showSection('tracked'); 
+        }
+
+        async function loadTrackedNotices() {
+            const res = await fetch('/api/tracked/list');
+            trackedNoticesData = await res.json();
+            const tbody = document.getElementById('tracked-table-body');
+            
+            if(trackedNoticesData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-20 text-center text-zinc-400 uppercase font-bold tracking-widest bg-white">No opportunities tracked yet.</td></tr>`; 
+                return;
+            }
+
+            tbody.innerHTML = trackedNoticesData.map(t => {
+                let r; try { r = JSON.parse(t.raw_json); } catch(e) { return ''; }
+                const { amount, startDate, endDate } = getNoticeData(r);
+                const { buyerName, cName, cEmail } = getCRMContactData(r);
+                
+                const title = (r.tender?.title || "No Title").substring(0, 60);
+                const displayValue = amount > 0 ? `£${amount.toLocaleString()}` : `Not Disclosed`;
+                const cEnd = endDate ? new Date(endDate).toLocaleDateString('en-GB', {month: 'short', year: '2-digit'}) : '--';
+
+                return `
+                    <tr class="hover:bg-zinc-50 transition-colors border-b border-zinc-100 bg-white">
+                        <td class="py-4 px-6 font-semibold text-elcom-blue leading-snug">${title}...<br><span class="text-[9px] text-zinc-400 uppercase font-bold">${r.ocid}</span></td>
+                        <td class="py-4 px-6 text-xs text-zinc-700"><b>${buyerName.substring(0,30)}</b><br>${cName ? cName : '<i class="text-zinc-400">No contact</i>'}</td>
+                        <td class="py-4 px-6 text-xs text-zinc-700"><b>${displayValue}</b><br>Ends: ${cEnd}</td>
+                        <td class="py-4 px-6"><textarea onchange="updateTrackedNote('${t.ocid}', this.value)" class="w-full text-xs text-zinc-800 p-2 bg-zinc-50 border border-zinc-200 rounded-lg focus:ring-1 focus:ring-amber-500 outline-none resize-none custom-scrollbar" rows="2" placeholder="Add sales notes...">${safeStr(t.notes)}</textarea></td>
+                        <td class="py-4 px-6 text-right"><button onclick="untrackNotice('${t.ocid}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>`;
+            }).join('');
+        }
+
+        async function updateTrackedNote(ocid, text) {
+            await fetch(`/api/tracked/notes/${ocid}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ notes: text }) });
+            
+            const trackedItem = trackedNoticesData.find(t => t.ocid === ocid);
+            if (trackedItem) {
+                trackedItem.notes = text;
+            }
+        }
+
+        async function untrackNotice(ocid) {
+            if(confirm("Remove from pipeline?")) {
+                await fetch(`/api/tracked/delete/${ocid}`, { method: 'DELETE' });
+                loadTrackedNotices();
+            }
+        }
+
+        function addRegion(val) {
+            if(val && !regionTags.includes(val)) { regionTags.push(val); renderRegionTags(); }
+            document.getElementById('region-input').value = '';
+        }
+        function renderRegionTags() {
+            document.getElementById('region-tags').innerHTML = regionTags.map((tag, i) => `<span class="px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm">${tag}<i class="fa-solid fa-xmark cursor-pointer" onclick="regionTags.splice(${i},1);renderRegionTags()"></i></span>`).join('');
+        }
+
         async function searchCpv(val) {
             const resDiv = document.getElementById('cpv-results');
             if(val.length < 3) { resDiv.classList.add('hidden'); return; }
@@ -582,45 +810,93 @@
             document.getElementById('profile-id').value = ""; document.getElementById('profile-name').value = ""; document.getElementById('notice-type-input').value = "";
             document.getElementById('min-val').value = 0; document.getElementById('max-val').value = 100000000;
             document.getElementById('expiry-from').value = ""; document.getElementById('expiry-to').value = "";
-            includeTags = []; excludeTags = []; cpvTags = []; renderTags('include-tags', includeTags); renderTags('exclude-tags', excludeTags); renderCpvTags(); togglePanel(true);
+            
+            includeTags = []; excludeTags = []; cpvTags = []; regionTags = [];
+            renderTags('include-tags', includeTags); renderTags('exclude-tags', excludeTags); renderCpvTags(); renderRegionTags();
+            togglePanel(true);
+        }
+
+        function editProfile(id, ev) {
+            ev.stopPropagation(); 
+            const p = allProfilesData.find(x => x.id == id); 
+            if(!p) { console.error("Profile not found!"); return; }
+
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+
+            setVal('profile-id', p.id); 
+            setVal('profile-name', safeStr(p.name)); 
+            setVal('notice-type-input', safeStr(p.notice_types));
+            setVal('min-val', p.min_value || 0); 
+            setVal('max-val', p.max_value || 100000000);
+            setVal('expiry-from', safeStr(p.expiry_from)); 
+            setVal('expiry-to', safeStr(p.expiry_to));
+            
+            const getTags = (str) => str ? str.split(',').map(x=>x.trim()).filter(x=>x) : [];
+            includeTags = getTags(safeStr(p.keyword)); 
+            excludeTags = getTags(safeStr(p.excluded_keywords)); 
+            cpvTags = getTags(safeStr(p.cpv_codes));
+            regionTags = getTags(safeStr(p.regions));
+            
+            renderTags('include-tags', includeTags); 
+            renderTags('exclude-tags', excludeTags); 
+            renderCpvTags(); 
+            renderRegionTags();
+            
+            togglePanel(true);
         }
 
         async function saveAdvancedProfile() {
             const getVal = (id) => document.getElementById(id).value.trim();
             const rawInc = getVal('keyword-input'); if(rawInc) includeTags.push(rawInc);
             const rawExc = getVal('exclude-input'); if(rawExc) excludeTags.push(rawExc);
+            
             const pId = document.getElementById('profile-id').value;
+            const expFrom = getVal('expiry-from');
+            const expTo = getVal('expiry-to');
+
             const profile = { 
-                name: getVal('profile-name') || "Untitled", keyword: includeTags.join(','), excluded_keywords: excludeTags.join(','), 
-                min_value: getVal('min-val') || 0, max_value: getVal('max-val') || 100000000, notice_types: document.getElementById('notice-type-input').value, 
-                cpv_codes: cpvTags.join(', '), expiry_from: getVal('expiry-from'), expiry_to: getVal('expiry-to')
+                name: getVal('profile-name') || "Untitled", 
+                keyword: includeTags.join(','), 
+                excluded_keywords: excludeTags.join(','), 
+                min_value: getVal('min-val') || 0, 
+                max_value: getVal('max-val') || 100000000, 
+                notice_types: document.getElementById('notice-type-input').value, 
+                cpv_codes: cpvTags.join(', '), 
+                regions: regionTags.join(','),
+                expiry_from: expFrom, 
+                expiry_to: expTo
             };
-            await fetch(pId ? `/api/profiles/edit/${pId}` : '/api/profiles/save', { method: pId ? 'PUT' : 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(profile) });
-            togglePanel(false); showSection('early'); 
+
+            await fetch(pId ? `/api/profiles/edit/${pId}` : '/api/profiles/save', { 
+                method: pId ? 'PUT' : 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify(profile) 
+            });
+            
+            togglePanel(false); 
+            if (expFrom || expTo) { showSection('early'); } else { showSection('profiles'); }
         }
 
         async function loadProfiles() {
             const res = await fetch('/api/profiles/list'); allProfilesData = await res.json();
-            
-            const standardProfiles = [];
-            const earlyProfiles = [];
-            
-            allProfilesData.forEach(p => {
-                if (safeStr(p.expiry_from) || safeStr(p.expiry_to)) { earlyProfiles.push(p); } else { standardProfiles.push(p); }
-            });
+            const standardProfiles = []; const earlyProfiles = [];
+            allProfilesData.forEach(p => { if (safeStr(p.expiry_from) || safeStr(p.expiry_to)) { earlyProfiles.push(p); } else { standardProfiles.push(p); } });
 
             const renderCard = (p) => {
-                const incStr = safeStr(p.keyword), stageStr = safeStr(p.notice_types);
+                const incStr = safeStr(p.keyword), stageStr = safeStr(p.notice_types), regStr = safeStr(p.regions);
                 const isEarly = !!(safeStr(p.expiry_from) || safeStr(p.expiry_to));
                 const dateTag = isEarly ? `<div class="text-xs text-elcom-orange font-bold uppercase mb-4 tracking-widest"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Tracking Expiries</div>` : '';
-                
                 return `
                 <div class="bg-white p-8 rounded-[2rem] border border-zinc-200 hover:border-elcom-blue transition-all group relative flex flex-col h-full shadow-lg">
-                    <div class="absolute top-6 right-6 flex gap-3"><button onclick="editProfile(${p.id}, event)" class="text-zinc-400 hover:text-elcom-blue transition-colors"><i class="fa-solid fa-pen text-xs"></i></button><button onclick="deleteProfile(${p.id}, event)" class="text-zinc-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash text-xs"></i></button></div>
+                    <div class="absolute top-6 right-6 flex gap-3 z-20">
+                        <button onclick="editProfile(${p.id}, event)" class="text-zinc-400 hover:text-elcom-blue transition-colors p-2"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button onclick="deleteProfile(${p.id}, event)" class="text-zinc-400 hover:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </div>
                     <h3 class="text-zinc-950 font-bold text-lg mb-4 truncate pr-16">${safeStr(p.name) || 'Untitled'}</h3>
                     ${dateTag}
                     <div class="flex flex-wrap gap-2 mb-4">
                         ${stageStr ? `<span class="bg-zinc-100 text-zinc-700 text-[9px] px-2 py-1 rounded font-bold uppercase border border-zinc-200">${stageStr}</span>` : ''}
+                        ${regStr ? regStr.split(',').map(r => `<span class="bg-emerald-50 text-emerald-700 text-[9px] px-2 py-1 rounded font-bold uppercase border border-emerald-200">${r}</span>`).join('') : ''}
                         ${incStr ? incStr.split(',').map(k => `<span class="bg-elcom-blue/5 text-elcom-blue text-[9px] px-2 py-1 rounded font-bold uppercase border border-elcom-blue/10">${k}</span>`).join('') : ''}
                     </div>
                     <div class="text-zinc-600 text-xs font-bold uppercase mb-4">£${Number(p.min_value || 0).toLocaleString()} - £${Number(p.max_value || 100000000).toLocaleString()}</div>
@@ -632,19 +908,30 @@
             document.getElementById('early-list').innerHTML = earlyProfiles.length ? earlyProfiles.map(renderCard).join('') : '<p class="text-zinc-500 italic">No early engagement trackers created yet.</p>';
         }
 
-        function editProfile(id, ev) {
-            ev.stopPropagation(); const p = allProfilesData.find(x => x.id === id); if(!p) return;
-            const setVal = (id, val) => document.getElementById(id).value = val;
-            setVal('profile-id', p.id); setVal('profile-name', safeStr(p.name)); setVal('notice-type-input', safeStr(p.notice_types));
-            setVal('min-val', p.min_value || 0); setVal('max-val', p.max_value || 100000000);
-            setVal('expiry-from', safeStr(p.expiry_from)); setVal('expiry-to', safeStr(p.expiry_to));
-            const getTags = (str) => str ? str.split(',').map(x=>x.trim()).filter(x=>x) : [];
-            includeTags = getTags(safeStr(p.keyword)); excludeTags = getTags(safeStr(p.excluded_keywords)); cpvTags = getTags(safeStr(p.cpv_codes));
-            renderTags('include-tags', includeTags); renderTags('exclude-tags', excludeTags); renderCpvTags(); togglePanel(true);
+        async function deleteProfile(id, ev) { ev.stopPropagation(); if(confirm("Delete?")) { await fetch('/api/profiles/delete/' + id, { method: 'DELETE' }); loadProfiles(); } }
+        
+        function clearFilter() { 
+            document.getElementById('active-filter-banner').classList.add('hidden'); 
+            document.getElementById('quick-search').value = ""; 
+            sortCol = 'date'; 
+            sortDesc = true;
+            renderTable(allReleases, true); 
         }
         
-        async function deleteProfile(id, ev) { ev.stopPropagation(); if(confirm("Delete?")) { await fetch('/api/profiles/delete/' + id, { method: 'DELETE' }); loadProfiles(); } }
-        function clearFilter() { document.getElementById('active-filter-banner').classList.add('hidden'); document.getElementById('quick-search').value = ""; renderTable(allReleases, true); }
+        document.getElementById('keyword-input').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.value.trim()) { includeTags.push(e.target.value.trim()); e.target.value = ''; renderTags('include-tags', includeTags); } });
+        document.getElementById('exclude-input').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.value.trim()) { excludeTags.push(e.target.value.trim()); e.target.value = ''; renderTags('exclude-tags', excludeTags); } });
+
+        function renderTags(containerId, list) {
+            const isExclude = containerId === 'exclude-tags';
+            const bgClass = isExclude ? 'bg-red-50 border-red-200 text-red-700' : 'bg-elcom-blue/5 border-elcom-blue/20 text-elcom-blue';
+            document.getElementById(containerId).innerHTML = list.map((tag, i) => `<span class="px-3 py-1.5 ${bgClass} border rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm">${tag}<i class="fa-solid fa-xmark cursor-pointer" onclick="removeTag('${containerId}', ${i})"></i></span>`).join('');
+        }
+
+        function removeTag(containerId, index) { 
+            if(containerId === 'include-tags') { includeTags.splice(index, 1); renderTags(containerId, includeTags); } 
+            else { excludeTags.splice(index, 1); renderTags(containerId, excludeTags); } 
+        }
+
         window.onload = fetchTenders;
     </script>
 </body>
