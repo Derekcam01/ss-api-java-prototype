@@ -54,8 +54,7 @@
                     <hr class="border-zinc-100">
                     <div>
                         <h4 class="text-[10px] font-bold text-zinc-500 uppercase mb-2">Attached Documents</h4>
-                        <div id="modal-documents" class="flex flex-col gap-2">
-                            </div>
+                        <div id="modal-documents" class="flex flex-col gap-2"></div>
                     </div>
 
                     <hr class="border-zinc-100">
@@ -100,10 +99,17 @@
                     <select id="region-input" onchange="addRegion(this.value)" class="w-full bg-white border border-zinc-200 rounded-xl px-4 py-3 text-sm outline-none text-zinc-950 focus:border-elcom-blue focus:ring-1 focus:ring-elcom-blue">
                         <option value="">Add Region...</option>
                         <option value="UK Wide">UK Wide</option>
-                        <option value="England">England</option>
+                        <option value="London">London</option>
+                        <option value="South East">South East</option>
+                        <option value="South West">South West</option>
+                        <option value="East of England">East of England</option>
+                        <option value="East Midlands">East Midlands</option>
+                        <option value="West Midlands">West Midlands</option>
+                        <option value="North West">North West</option>
+                        <option value="North East">North East</option>
+                        <option value="Yorkshire and The Humber">Yorkshire and The Humber</option>
                         <option value="Scotland">Scotland</option>
                         <option value="Wales">Wales</option>
-                        <option value="Northern Ireland">Northern Ireland</option>
                     </select>
                 </div>
             </div>
@@ -114,6 +120,14 @@
                 <div class="col-span-2"><span class="text-[10px] font-bold text-elcom-orange uppercase block"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Contract Expiry Hunt</span></div>
                 <div><label class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">Expiring From</label><input id="expiry-from" type="date" class="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-950 outline-none focus:border-elcom-blue"></div>
                 <div><label class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">Expiring To</label><input id="expiry-to" type="date" class="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-950 outline-none focus:border-elcom-blue"></div>
+            </div>
+
+            <div>
+                <label class="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">Keyword & CPV Match Rule</label>
+                <select id="match-logic-input" class="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm outline-none text-zinc-950 focus:border-elcom-blue focus:ring-1 focus:ring-elcom-blue font-semibold">
+                    <option value="OR">Match EITHER (Keyword OR CPV)</option>
+                    <option value="AND">Match both exactly</option>
+                </select>
             </div>
 
             <div>
@@ -269,6 +283,8 @@
         let sortCol = 'date';
         let sortDesc = true; 
         let currentModalOcid = null; 
+        
+        let viewedNotices = new Set(JSON.parse(localStorage.getItem('elcom_viewed_notices') || '[]'));
 
         function showSection(section) {
             document.getElementById('view-discover').classList.toggle('hidden', section !== 'discover');
@@ -346,16 +362,12 @@
             return score;
         }
 
-        function getSearchMatches(item, incTags, excTags, cpvTags, stage) {
-            const title = (item.tender?.title || "").toLowerCase();
-            const desc = (item.tender?.description || "").toLowerCase();
-            const buyerNames = (item.parties || []).map(p => p.name || "").join(" ").toLowerCase(); 
-            let fullText = `${title} ${desc} ${buyerNames}`;
-
-            fullText = fullText.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi, ' ');
-            fullText = fullText.replace(/https?:\/\/[^\s]+/gi, ' ');
-            fullText = fullText.replace(/www\.[^\s]+/gi, ' ');
-            fullText = fullText.replace(/\b[a-z0-9-]+\.[a-z0-9-]+\.[a-z]{2,}\b/gi, ' ');
+        function getSearchMatches(item, incTags, excTags, cpvTags, regionTags, stage, matchLogic = 'OR') {
+            let rawJsonStr = JSON.stringify(item).toLowerCase();
+            rawJsonStr = rawJsonStr.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi, ' ');
+            rawJsonStr = rawJsonStr.replace(/https?:\/\/[^\s"]+/gi, ' ');
+            rawJsonStr = rawJsonStr.replace(/www\.[^\s"]+/gi, ' ');
+            rawJsonStr = rawJsonStr.replace(/\b[a-z0-9-]+\.[a-z0-9-]+\.[a-z]{2,}\b/gi, ' ');
 
             const containsExactWord = (text, word) => {
                 const escaped = word.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -363,29 +375,55 @@
                 return regex.test(text);
             };
 
-            if (excTags && excTags.length > 0) { if (excTags.some(k => containsExactWord(fullText, k))) return false; }
+            // 1. STAGE (Strict)
             if (stage) {
                 const tagStr = (item.tag || []).join(',').toLowerCase();
-                if (!tagStr.includes(stage)) return false;
+                if (!tagStr.includes(stage)) return false; 
             }
 
+            // 2. REGION (Strict)
+            if (regionTags && regionTags.length > 0) {
+                const passedRegion = regionTags.some(r => rawJsonStr.includes(r.toLowerCase()));
+                if (!passedRegion) return false; 
+            }
+
+            // 3. EXCLUDE KEYWORDS (Strict NOT)
+            if (excTags && excTags.length > 0) { 
+                if (excTags.some(k => containsExactWord(rawJsonStr, k))) return false; 
+            }
+
+            // 4. KEYWORDS & CPV (Determined by User Toggle)
             const hasK = incTags && incTags.length > 0;
             const hasC = cpvTags && cpvTags.length > 0;
-            let passK = false; let passC = false;
 
-            if (hasK) passK = incTags.some(k => containsExactWord(fullText, k));
+            let passK = false;
+            let passC = false;
+
+            // Notice how we use the rawJsonStr to scan for both keywords and CPV codes now, bypassing hidden object traps!
+            if (hasK) {
+                passK = incTags.some(k => containsExactWord(rawJsonStr, k));
+            }
             if (hasC) {
-                const { cpvId } = getNoticeData(item);
+                const extractedCpv = (getNoticeData(item).cpvId || "").toLowerCase();
                 passC = cpvTags.some(c => {
-                    const code = c.split(' ')[0].toLowerCase();
-                    return cpvId.toLowerCase().includes(code) || containsExactWord(fullText, code);
+                    const code = c.split(' ')[0].toLowerCase().trim();
+                    return extractedCpv.includes(code) || rawJsonStr.includes(code); 
                 });
             }
 
-            if (hasK && hasC) return passK && passC;
-            if (hasK) return passK;
-            if (hasC) return passC;
-            return true;
+            if (hasK && hasC) {
+                if (matchLogic === 'AND') {
+                    if (!passK || !passC) return false; 
+                } else {
+                    if (!passK && !passC) return false;
+                }
+            } else if (hasK) {
+                if (!passK) return false;
+            } else if (hasC) {
+                if (!passC) return false;
+            }
+
+            return true; 
         }
 
         async function runQuickSearch(val) {
@@ -417,13 +455,13 @@
             const rawInc = getVal('keyword-input');
             let tempIncludeTags = [...includeTags];
             if (rawInc) tempIncludeTags.push(rawInc);
-            const keywordStr = tempIncludeTags.join(',');
-
+            
             const rawExc = getVal('exclude-input');
             let tempExcludeTags = [...excludeTags];
             if (rawExc) tempExcludeTags.push(rawExc);
 
             const stage = getVal('notice-type-input').toLowerCase();
+            const matchLogic = getVal('match-logic-input'); 
             const minV = Number(getVal('min-val')) || 0;
             const maxV = Number(getVal('max-val')) || 1000000000;
             
@@ -432,9 +470,16 @@
             const expFrom = expFromStr ? new Date(expFromStr) : null;
             const expTo = expToStr ? new Date(expToStr) : null;
 
+            // FIX: Combine Keywords AND CPVs to send to the backend so it fetches a massive net of data!
+            let searchTerms = [...tempIncludeTags];
+            if (cpvTags.length > 0) {
+                cpvTags.forEach(c => searchTerms.push(c.split(' ')[0]));
+            }
+            const queryStr = searchTerms.join(',');
+
             let backendResults = [];
             try {
-                const res = await fetch('/api/vault-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: keywordStr }) });
+                const res = await fetch('/api/vault-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: queryStr }) });
                 const data = await res.json();
                 backendResults = data.releases || [];
             } catch (err) { return; }
@@ -442,7 +487,7 @@
             const finalFiltered = backendResults.filter(r => {
                 const { amount, endDate } = getNoticeData(r);
                 const matchBudget = (amount >= minV && amount <= maxV);
-                const matchContent = getSearchMatches(r, tempIncludeTags, tempExcludeTags, cpvTags, stage);
+                const matchContent = getSearchMatches(r, tempIncludeTags, tempExcludeTags, cpvTags, regionTags, stage, matchLogic);
                 
                 let matchDate = true;
                 if (expFrom || expTo) {
@@ -475,18 +520,12 @@
             document.getElementById('active-filter-type').innerText = "Active Saved Profile";
             document.getElementById('active-filter-name').innerText = p.name;
             
-            const rawKeywords = safeStr(p.keyword);
-            let backendResults = [];
-            try {
-                const res = await fetch('/api/vault-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: rawKeywords }) });
-                const data = await res.json();
-                backendResults = data.releases || [];
-            } catch (err) { return; }
-            
-            const inc = rawKeywords.split(',').map(x=>x.trim()).filter(x=>x);
+            const inc = safeStr(p.keyword).split(',').map(x=>x.trim()).filter(x=>x);
             const exc = safeStr(p.excluded_keywords).split(',').map(x=>x.trim()).filter(x=>x);
             const cpvArr = safeStr(p.cpv_codes).split(',').map(x=>x.trim()).filter(x=>x);
+            const regArr = safeStr(p.regions).split(',').map(x=>x.trim()).filter(x=>x);
             const stage = safeStr(p.notice_types).toLowerCase();
+            const matchLogic = safeStr(p.match_logic) || 'OR'; 
             const minV = Number(p.min_value) || 0;
             const maxV = Number(p.max_value) || 1000000000;
             
@@ -495,10 +534,24 @@
             const expFrom = expFromStr ? new Date(expFromStr) : null;
             const expTo = expToStr ? new Date(expToStr) : null;
 
+            // FIX: Combine Keywords AND CPVs to send to the backend
+            let searchTerms = [...inc];
+            if (cpvArr.length > 0) {
+                cpvArr.forEach(c => searchTerms.push(c.split(' ')[0]));
+            }
+            const backendFetchStr = searchTerms.join(',');
+
+            let backendResults = [];
+            try {
+                const res = await fetch('/api/vault-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: backendFetchStr }) });
+                const data = await res.json();
+                backendResults = data.releases || [];
+            } catch (err) { return; }
+
             const finalFiltered = backendResults.filter(r => {
                 const { amount, endDate } = getNoticeData(r);
                 const matchBudget = (amount >= minV && amount <= maxV);
-                const matchContent = getSearchMatches(r, inc, exc, cpvArr, stage);
+                const matchContent = getSearchMatches(r, inc, exc, cpvArr, regArr, stage, matchLogic);
                 let matchDate = true;
                 if (expFrom || expTo) {
                     if (!endDate) { matchDate = false; } else {
@@ -603,9 +656,13 @@
                     ? `<div class="inline-flex items-center justify-center bg-zinc-100 px-2 py-1 rounded text-xs font-black text-zinc-700 border border-zinc-200 shadow-sm min-w-[32px]"><i class="fa-solid fa-fire text-orange-500 mr-1.5"></i>${r._score}</div>` 
                     : '<span class="text-zinc-300 font-mono">-</span>';
 
+                const isViewed = viewedNotices.has(r.ocid);
+                const titleStyle = isViewed ? 'text-zinc-500 font-normal' : 'text-elcom-blue font-semibold';
+                const viewedIndicator = isViewed ? '<i class="fa-solid fa-check-double text-zinc-300 mr-1.5" title="Viewed"></i>' : '';
+
                 return `
                     <tr class="hover:bg-zinc-50 transition-colors group cursor-pointer border-b border-zinc-100 bg-white" onclick='openModalById("${r.ocid}")'>
-                        <td class="py-4 px-6 font-semibold text-elcom-blue group-hover:underline leading-snug pr-6">${title}...</td>
+                        <td class="py-4 px-6 ${titleStyle} group-hover:underline leading-snug pr-6" id="row-title-${r.ocid}">${viewedIndicator}${title}...</td>
                         <td class="py-4 px-6">${scoreBadge}</td>
                         <td class="py-4 px-6 text-zinc-600 text-xs font-medium whitespace-nowrap">${pubDateStr}</td>
                         <td class="py-4 px-6">${typeBadge}</td>
@@ -654,26 +711,46 @@
         }
 
         function exportTrackedToCSV() {
-            const rows = [["Opportunity", "Published", "Notice Type", "Buyer", "Contact Name", "Contact Email", "Contact Phone", "Value", "Start Date", "End Date", "Sales Notes"]];
+            const rows = [["Opportunity", "Notice Type", "Buyer", "Value", "Start Date", "End Date", "Sales Notes"]];
             trackedNoticesData.forEach(t => {
                 try {
                     const r = JSON.parse(t.raw_json);
-                    const { amount, startDate, endDate, publishDate } = getNoticeData(r);
-                    const { buyerName, cName, cEmail, cPhone } = getCRMContactData(r);
-                    rows.push([ `"${r.tender?.title || ''}"`, `"${publishDate}"`, `"${(r.tag || []).join(', ')}"`, `"${buyerName}"`, `"${cName}"`, `"${cEmail}"`, `"${cPhone}"`, amount, `"${startDate}"`, `"${endDate}"`, `"${(t.notes || '').replace(/"/g, '""')}"` ]);
+                    const { amount, startDate, endDate } = getNoticeData(r);
+                    const { buyerName } = getCRMContactData(r);
+                    rows.push([ `"${r.tender?.title || ''}"`, `"${(r.tag || []).join(', ')}"`, `"${buyerName}"`, amount, `"${startDate}"`, `"${endDate}"`, `"${(t.notes || '').replace(/"/g, '""')}"` ]);
                 } catch(e) {}
             });
             let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
             const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", "CRM_Pipeline_Export.csv"); link.click();
         }
 
-        // ==================================================
-        // NEW: DOCUMENTS EXTRACTION & RENDERING IN MODAL
-        // ==================================================
         function openModalById(ocid) {
             currentModalOcid = ocid; 
+            
             let r = currentFilteredResults.find(x => x.ocid === ocid) || allReleases.find(x => x.ocid === ocid);
+            
+            if(!r) {
+                const trackedItem = trackedNoticesData.find(x => x.ocid === ocid);
+                if(trackedItem) {
+                    try { r = JSON.parse(trackedItem.raw_json); } catch(e) {}
+                }
+            }
+            
             if(!r) return;
+
+            if (!viewedNotices.has(ocid)) {
+                viewedNotices.add(ocid);
+                localStorage.setItem('elcom_viewed_notices', JSON.stringify([...viewedNotices]));
+                
+                const titleCell = document.getElementById(`row-title-${ocid}`);
+                if (titleCell) {
+                    titleCell.className = `py-4 px-6 text-zinc-500 font-normal group-hover:underline leading-snug pr-6`;
+                    if(!titleCell.innerHTML.includes('fa-check-double')) {
+                        titleCell.innerHTML = `<i class="fa-solid fa-check-double text-zinc-300 mr-1.5" title="Viewed"></i>` + titleCell.innerHTML;
+                    }
+                }
+            }
+
             const { amount, startDate, endDate, cpvId, cpvDesc } = getNoticeData(r);
             const { buyerName, cName, cEmail, cPhone } = getCRMContactData(r);
 
@@ -687,7 +764,6 @@
             document.getElementById('modal-value').innerText = "£" + amount.toLocaleString();
             document.getElementById('modal-link').href = "https://www.find-tender.service.gov.uk/Notice/" + (r.tender?.id || "");
             
-            // Render the Portal Link if available
             const portalUrl = getPortalLink(r);
             const portalBtn = document.getElementById('modal-portal-link');
             if (portalUrl) {
@@ -697,7 +773,6 @@
                 portalBtn.classList.add('hidden');
             }
 
-            // Extract and Render Attached Documents
             const docsContainer = document.getElementById('modal-documents');
             const docs = r.tender?.documents || [];
             
@@ -765,7 +840,10 @@
 
                 return `
                     <tr class="hover:bg-zinc-50 transition-colors border-b border-zinc-100 bg-white">
-                        <td class="py-4 px-6 font-semibold text-elcom-blue leading-snug">${title}...<br><span class="text-[9px] text-zinc-400 uppercase font-bold">${r.ocid}</span></td>
+                        <td class="py-4 px-6 cursor-pointer group" onclick='openModalById("${t.ocid}")'>
+                            <div class="font-semibold text-elcom-blue group-hover:underline leading-snug pr-4"><i class="fa-solid fa-up-right-from-square text-zinc-300 mr-1.5 opacity-0 group-hover:opacity-100 transition-opacity"></i>${title}...</div>
+                            <span class="text-[9px] text-zinc-400 uppercase font-bold">${t.ocid}</span>
+                        </td>
                         <td class="py-4 px-6 text-xs text-zinc-700"><b>${buyerName.substring(0,30)}</b><br>${cName ? cName : '<i class="text-zinc-400">No contact</i>'}</td>
                         <td class="py-4 px-6 text-xs text-zinc-700"><b>${displayValue}</b><br>Ends: ${cEnd}</td>
                         <td class="py-4 px-6"><textarea onchange="updateTrackedNote('${t.ocid}', this.value)" class="w-full text-xs text-zinc-800 p-2 bg-zinc-50 border border-zinc-200 rounded-lg focus:ring-1 focus:ring-amber-500 outline-none resize-none custom-scrollbar" rows="2" placeholder="Add sales notes...">${safeStr(t.notes)}</textarea></td>
@@ -810,6 +888,7 @@
             document.getElementById('profile-id').value = ""; document.getElementById('profile-name').value = ""; document.getElementById('notice-type-input').value = "";
             document.getElementById('min-val').value = 0; document.getElementById('max-val').value = 100000000;
             document.getElementById('expiry-from').value = ""; document.getElementById('expiry-to').value = "";
+            document.getElementById('match-logic-input').value = "OR";
             
             includeTags = []; excludeTags = []; cpvTags = []; regionTags = [];
             renderTags('include-tags', includeTags); renderTags('exclude-tags', excludeTags); renderCpvTags(); renderRegionTags();
@@ -826,6 +905,7 @@
             setVal('profile-id', p.id); 
             setVal('profile-name', safeStr(p.name)); 
             setVal('notice-type-input', safeStr(p.notice_types));
+            setVal('match-logic-input', safeStr(p.match_logic) || 'OR');
             setVal('min-val', p.min_value || 0); 
             setVal('max-val', p.max_value || 100000000);
             setVal('expiry-from', safeStr(p.expiry_from)); 
@@ -861,6 +941,7 @@
                 min_value: getVal('min-val') || 0, 
                 max_value: getVal('max-val') || 100000000, 
                 notice_types: document.getElementById('notice-type-input').value, 
+                match_logic: document.getElementById('match-logic-input').value,
                 cpv_codes: cpvTags.join(', '), 
                 regions: regionTags.join(','),
                 expiry_from: expFrom, 
@@ -884,8 +965,15 @@
 
             const renderCard = (p) => {
                 const incStr = safeStr(p.keyword), stageStr = safeStr(p.notice_types), regStr = safeStr(p.regions);
+                const logicStr = safeStr(p.match_logic) || 'OR';
                 const isEarly = !!(safeStr(p.expiry_from) || safeStr(p.expiry_to));
                 const dateTag = isEarly ? `<div class="text-xs text-elcom-orange font-bold uppercase mb-4 tracking-widest"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Tracking Expiries</div>` : '';
+                
+                let logicBadge = '';
+                if(incStr && safeStr(p.cpv_codes)) {
+                    logicBadge = `<span class="bg-indigo-100 text-indigo-700 text-[9px] px-2 py-1 rounded font-bold uppercase border border-indigo-200" title="Keyword & CPV Match Logic">${logicStr} Logic</span>`;
+                }
+
                 return `
                 <div class="bg-white p-8 rounded-[2rem] border border-zinc-200 hover:border-elcom-blue transition-all group relative flex flex-col h-full shadow-lg">
                     <div class="absolute top-6 right-6 flex gap-3 z-20">
@@ -896,6 +984,7 @@
                     ${dateTag}
                     <div class="flex flex-wrap gap-2 mb-4">
                         ${stageStr ? `<span class="bg-zinc-100 text-zinc-700 text-[9px] px-2 py-1 rounded font-bold uppercase border border-zinc-200">${stageStr}</span>` : ''}
+                        ${logicBadge}
                         ${regStr ? regStr.split(',').map(r => `<span class="bg-emerald-50 text-emerald-700 text-[9px] px-2 py-1 rounded font-bold uppercase border border-emerald-200">${r}</span>`).join('') : ''}
                         ${incStr ? incStr.split(',').map(k => `<span class="bg-elcom-blue/5 text-elcom-blue text-[9px] px-2 py-1 rounded font-bold uppercase border border-elcom-blue/10">${k}</span>`).join('') : ''}
                     </div>
